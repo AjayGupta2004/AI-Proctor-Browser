@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>ProctorAI — Teacher Register</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--bg-base)
+    }
+
+    .register-wrap {
+      width: 100%;
+      max-width: 440px;
+      padding: 24px
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      justify-content: center
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #0F1D2E;
+      border: 1px solid rgba(55, 138, 221, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary)
+    }
+
+    .logo-sub {
+      font-size: 12px;
+      color: var(--text-muted)
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden
+    }
+
+    .card-head {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary)
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px
+    }
+
+    .card-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary)
+    }
+
+    .req {
+      color: var(--red);
+      margin-left: 2px
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 13px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s;
+      box-sizing: border-box
+    }
+
+    input:focus {
+      border-color: rgba(55, 138, 221, .6)
+    }
+
+    .err-box {
+      background: var(--red-bg);
+      border: 1px solid var(--red-border);
+      border-radius: var(--radius-md);
+      padding: 10px 13px;
+      font-size: 12px;
+      color: #FC8585;
+      display: none
+    }
+
+    .err-box.visible {
+      display: block
+    }
+
+    .success-box {
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      border-radius: var(--radius-md);
+      padding: 10px 13px;
+      font-size: 12px;
+      color: #5DCAA5;
+      display: none
+    }
+
+    .success-box.visible {
+      display: block
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 11px;
+      background: #185FA5;
+      border: 1px solid var(--blue);
+      border-radius: var(--radius-md);
+      color: #B5D4F4;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit
+    }
+
+    .submit-btn:hover {
+      background: #1D6DB8
+    }
+
+    .submit-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed
+    }
+
+    .footer-link {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 16px 0
+    }
+
+    .footer-link a {
+      color: #7BB8E8;
+      text-decoration: none
+    }
+
+    .footer-link a:hover {
+      text-decoration: underline
+    }
+  </style>
+</head>
+
+<body>
+  <div class="register-wrap">
+    <div class="logo-row">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M11 2L4 5v6c0 4.4 3 8.2 7 9 4-.8 7-4.6 7-9V5L11 2Z" stroke="#378ADD" stroke-width="1.2"
+            fill="rgba(55,138,221,0.1)" />
+          <path d="M8 11l2 2 4-4" stroke="#378ADD" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">ProctorAI</div>
+        <div class="logo-sub">Teacher Registration</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Create Teacher Account</div>
+        <div class="card-sub">Register to access the teacher dashboard.</div>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Full Name<span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="e.g. Dr. Ramesh Kumar" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label>Username<span class="req">*</span></label>
+          <input type="text" id="f-username" placeholder="e.g. teacher_ramesh" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>Email (optional)</label>
+          <input type="email" id="f-email" placeholder="e.g. ramesh@school.edu" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label>Password<span class="req">*</span></label>
+          <input type="password" id="f-password" placeholder="Min 6 characters" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label>Confirm Password<span class="req">*</span></label>
+          <input type="password" id="f-confirm" placeholder="Repeat password" autocomplete="new-password" />
+        </div>
+        <div class="err-box" id="err-box"></div>
+        <div class="success-box" id="success-box">Account created! Redirecting to login…</div>
+        <button class="submit-btn" id="submit-btn" onclick="doRegister()">Create Account</button>
+      </div>
+    </div>
+    <div class="footer-link">Already have an account? <a href="login.html">Sign in</a></div>
+  </div>
+  <script>
+    var BASE = 'http://localhost:4000';
+
+    function showErr(msg) {
+      var b = document.getElementById('err-box'); b.textContent = msg; b.className = 'err-box visible';
+      document.getElementById('success-box').className = 'success-box';
+    }
+
+    document.addEventListener('keydown', function (e) { if (e.key === 'Enter') doRegister(); });
+
+    function doRegister() {
+      var name = document.getElementById('f-name').value.trim();
+      var username = document.getElementById('f-username').value.trim();
+      var email = document.getElementById('f-email').value.trim();
+      var pw = document.getElementById('f-password').value;
+      var confirm = document.getElementById('f-confirm').value;
+
+      if (!name) { showErr('Full name is required.'); return; }
+      if (!username) { showErr('Username is required.'); return; }
+      if (!/^[a-zA-Z0-9_]{3,30}$/.test(username)) { showErr('Username must be 3-30 chars, letters/numbers/underscore only.'); return; }
+      if (!pw || pw.length < 6) { showErr('Password must be at least 6 characters.'); return; }
+      if (pw !== confirm) { showErr('Passwords do not match.'); return; }
+
+      var btn = document.getElementById('submit-btn');
+      btn.disabled = true; btn.textContent = 'Creating account…';
+      document.getElementById('err-box').className = 'err-box';
+
+      fetch(BASE + '/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName: name, username: username, email: email || undefined, password: pw })
+      }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+        .then(function (res) {
+          if (!res.ok) { showErr(res.data.error || 'Registration failed.'); btn.disabled = false; btn.textContent = 'Create Account'; return; }
+          document.getElementById('success-box').className = 'success-box visible';
+          btn.textContent = 'Success!';
+          setTimeout(function () { window.location.href = 'login.html'; }, 1500);
+        }).catch(function () { showErr('Cannot reach server. Make sure the backend is running.'); btn.disabled = false; btn.textContent = 'Create Account'; });
+    }
+  </script>
+</body>
+
+</html>

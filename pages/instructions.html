@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Exam Instructions</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px;
+    }
+
+    .inst-container {
+      max-width: 620px;
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 30px 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .inst-header { text-align: center; margin-bottom: 22px; }
+    .inst-header h1 { font-size: 20px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+    .inst-header .exam-subtitle { font-size: 12px; color: var(--text-muted); }
+
+    .exam-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+    .meta-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .meta-pill.warn { border-color: rgba(226,75,74,0.3); color: #FC8585; background: #1A0B0B; }
+
+    .inst-group { margin-bottom: 22px; }
+    .inst-group h2 {
+      font-size: 13px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 12px;
+      padding-bottom: 6px; border-bottom: 1px solid var(--border);
+    }
+    .inst-group.dos h2  { color: #5DCAA5; border-bottom-color: rgba(29,158,117,0.3); }
+    .inst-group.donts h2 { color: #FC8585; border-bottom-color: rgba(226,75,74,0.3); }
+
+    .inst-list { list-style: none; }
+    .inst-list li {
+      position: relative; padding-left: 24px; margin-bottom: 10px;
+      font-size: 13.5px; color: var(--text-secondary); line-height: 1.4;
+    }
+    .inst-list li::before {
+      content: ''; position: absolute; left: 0; top: 4px;
+      width: 14px; height: 14px;
+      background-size: contain; background-repeat: no-repeat; background-position: center;
+    }
+    .inst-group.dos .inst-list li::before {
+      background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17l-5-5" stroke="%235DCAA5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    }
+    .inst-group.donts .inst-list li::before {
+      background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="%23FC8585" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    }
+
+    .confirm-box {
+      background: var(--bg-card); border: 1px solid var(--border-md);
+      border-radius: var(--radius-md); padding: 16px; margin-top: 24px;
+      display: flex; align-items: flex-start; gap: 12px;
+      cursor: pointer; transition: background 0.2s, border-color 0.2s;
+    }
+    .confirm-box:hover { background: var(--bg-raised); border-color: var(--border-strong); }
+    .confirm-box input[type="checkbox"] {
+      margin-top: 2px; width: 16px; height: 16px;
+      accent-color: var(--blue); cursor: pointer;
+    }
+    .confirm-box label { font-size: 13px; color: var(--text-primary); cursor: pointer; user-select: none; }
+    .confirm-box label span { display: block; font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    .action-row { margin-top: 22px; display: flex; justify-content: flex-end; }
+    .btn-large { padding: 12px 24px; font-size: 14px; }
+    .btn-large:disabled {
+      opacity: 0.5; cursor: not-allowed;
+      background: transparent; color: var(--text-muted); border-color: var(--border);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="inst-container">
+    <div class="inst-header">
+      <h1 id="exam-title-heading">Exam Instructions</h1>
+      <div class="exam-subtitle" id="exam-subtitle"></div>
+    </div>
+
+    <!-- Dynamic exam metadata pills — filled by JS below -->
+    <div class="exam-meta" id="exam-meta-row"></div>
+
+    <div class="inst-group dos">
+      <h2>Do's</h2>
+      <ul class="inst-list">
+        <li>Ensure your face is clearly visible to the webcam at all times.</li>
+        <li>Stay in a quiet, well-lit room where you are completely alone.</li>
+        <li>Keep your eyes focused entirely on the examination screen.</li>
+        <li>Ensure your microphone is active but the environment remains silent.</li>
+      </ul>
+    </div>
+
+    <div class="inst-group donts">
+      <h2>Don'ts</h2>
+      <ul class="inst-list">
+        <li>Do not switch tabs, minimize the browser, or open other applications.</li>
+        <li>Do not look away from the screen for extended periods (tracked automatically).</li>
+        <li>Do not talk out loud, read questions aloud, or communicate with anyone.</li>
+        <li>Do not allow any secondary devices (phones, tablets) into the camera frame.</li>
+        <li id="neg-mark-rule" style="display:none">
+          Incorrect answers carry <strong>negative marks</strong> — leave a question unanswered if unsure.
+        </li>
+      </ul>
+    </div>
+
+    <label class="confirm-box" for="agree-check">
+      <input type="checkbox" id="agree-check" onchange="toggleProceed()" />
+      <div>
+        <label for="agree-check">I have read and understood all the instructions carefully.</label>
+        <span>I understand that any violation will be automatically flagged and reported to
+          my institution via AI tracking, which may result in disqualification.</span>
+      </div>
+    </label>
+
+    <div class="action-row">
+      <button class="btn btn-primary btn-large" id="proceed-btn" disabled onclick="startExam()">
+        Proceed to Exam Room
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ── Populate page from exam_data stored at login ───────────────
+    (function () {
+      var raw = localStorage.getItem('exam_data');
+      if (!raw) {
+        // No exam loaded — redirect back to login
+        window.location.href = 'login.html';
+        return;
+      }
+      try {
+        var exam = JSON.parse(raw);
+        var studentName = localStorage.getItem('student_name') || '';
+
+        // Exam title
+        if (exam.title) {
+          document.getElementById('exam-title-heading').textContent = exam.title;
+        }
+
+        // Student name subtitle
+        if (studentName) {
+          document.getElementById('exam-subtitle').textContent = 'Candidate: ' + studentName;
+        }
+
+        // Build info pills
+        var metaRow = document.getElementById('exam-meta-row');
+        function addPill(icon, text, isWarn) {
+          var d = document.createElement('div');
+          d.className = 'meta-pill' + (isWarn ? ' warn' : '');
+          d.textContent = icon + ' ' + text;
+          metaRow.appendChild(d);
+        }
+
+        if (exam.subject)      addPill('📚', exam.subject);
+        if (exam.duration)     addPill('⏱️', exam.duration + ' minutes');
+        var qCount = Array.isArray(exam.questions) ? exam.questions.length : 0;
+        if (qCount)            addPill('📝', qCount + ' question' + (qCount !== 1 ? 's' : ''));
+        if (exam.totalMarks)   addPill('🏆', 'Total: ' + exam.totalMarks + ' marks');
+        if (exam.passingMarks) addPill('✅', 'Pass at: ' + exam.passingMarks + ' marks');
+
+        // Show negative marking warning if any question has negative_marks > 0
+        var hasNeg = Array.isArray(exam.questions) &&
+          exam.questions.some(function (q) { return Number(q.negative_marks) > 0; });
+        if (hasNeg) {
+          var negRule = document.getElementById('neg-mark-rule');
+          if (negRule) negRule.style.display = 'list-item';
+          addPill('⚠️', 'Negative marking applies', true);
+        }
+      } catch (e) {
+        console.warn('[Instructions] Could not parse exam_data:', e);
+      }
+    })();
+
+    function toggleProceed() {
+      var cb = document.getElementById('agree-check');
+      var btn = document.getElementById('proceed-btn');
+      btn.disabled = !cb.checked;
+    }
+
+    function startExam() {
+      window.location.href = 'exam-room.html';
+    }
+  </script>
+</body>
+
+</html>

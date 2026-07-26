@@ -1,0 +1,413 @@
+/* =============================================
+   ProctorAI — Shared Styles
+   Used by all pages in the Electron app
+   ============================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-base: #0A0C11;
+  --bg-surface: #0D0F16;
+  --bg-card: #13161E;
+  --bg-raised: #1A1D28;
+  --bg-input: #111420;
+
+  --border: rgba(255, 255, 255, 0.07);
+  --border-md: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.20);
+
+  --text-primary: #E2E4EC;
+  --text-secondary: #9294A0;
+  --text-muted: #5A5D6B;
+  --text-hint: #3E4150;
+
+  --blue: #378ADD;
+  --blue-bg: #0F1D2E;
+  --blue-border: rgba(55, 138, 221, 0.35);
+
+  --green: #1D9E75;
+  --green-bg: #091510;
+  --green-border: rgba(29, 158, 117, 0.35);
+
+  --amber: #EF9F27;
+  --amber-bg: #1C1208;
+  --amber-border: rgba(239, 159, 39, 0.35);
+
+  --red: #E24B4A;
+  --red-bg: #1A0B0B;
+  --red-border: rgba(226, 75, 74, 0.35);
+
+  --purple: #7F77DD;
+  --purple-bg: #1A1328;
+  --purple-border: rgba(127, 119, 221, 0.3);
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-raised);
+  border-radius: 3px;
+}
+
+/* ---- Topbar ---- */
+.topbar {
+  background: #0F1117;
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  -webkit-app-region: drag;
+}
+
+.topbar * {
+  -webkit-app-region: no-drag;
+}
+
+.topbar-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.topbar-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ---- Pills / Badges ---- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.pill-red {
+  background: var(--red-bg);
+  border-color: #7A2020;
+  color: #FC8585;
+}
+
+.pill-amber {
+  background: var(--amber-bg);
+  border-color: #6B3D08;
+  color: #FAC775;
+}
+
+.pill-green {
+  background: var(--green-bg);
+  border-color: #1A5230;
+  color: #5DCAA5;
+}
+
+.pill-blue {
+  background: var(--blue-bg);
+  border-color: #1A3D6B;
+  color: #7BB8E8;
+}
+
+.pill-purple {
+  background: var(--purple-bg);
+  border-color: #3A3470;
+  color: #AFA9EC;
+}
+
+/* ---- Status dot ---- */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.dot-red {
+  background: #E24B4A;
+}
+
+.dot-green {
+  background: #1D9E75;
+}
+
+.dot-amber {
+  background: #EF9F27;
+}
+
+.dot-blue {
+  background: #378ADD;
+}
+
+.dot-sm {
+  width: 5px;
+  height: 5px;
+}
+
+/* ---- Pulse animation ---- */
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.pulse {
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+/* ---- Cards ---- */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.card-head {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.card-body {
+  padding: 14px 16px;
+}
+
+/* ---- Buttons ---- */
+.btn {
+  background: transparent;
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-md);
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-secondary);
+  font-family: inherit;
+}
+
+.btn:hover {
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.btn-primary {
+  background: #185FA5;
+  border-color: var(--blue);
+  color: #B5D4F4;
+}
+
+.btn-primary:hover {
+  background: #1D6DB8;
+}
+
+.btn-success {
+  background: var(--green-bg);
+  border-color: var(--green-border);
+  color: #5DCAA5;
+}
+
+.btn-success:hover {
+  background: #0F3520;
+}
+
+.btn-danger {
+  background: var(--red-bg);
+  border-color: var(--red-border);
+  color: #FC8585;
+}
+
+.btn-danger:hover {
+  background: #2A1010;
+}
+
+.btn-warn {
+  color: #FAC775;
+  border-color: rgba(239, 159, 39, 0.3);
+}
+
+.btn-warn:hover {
+  background: #2B1A10;
+}
+
+/* ---- Progress bar ---- */
+.progress-track {
+  height: 3px;
+  background: var(--bg-raised);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+/* ---- Section label ---- */
+.sec-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-hint);
+  margin-bottom: 7px;
+}
+
+/* ---- Signal rows ---- */
+.signal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 11px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.sig-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sig-ok {
+  background: #0A1F15;
+}
+
+.sig-warn {
+  background: #1E1308;
+}
+
+.sig-danger {
+  background: #1A0B0B;
+}
+
+.sig-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.sig-val {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.val-ok {
+  color: #5DCAA5;
+}
+
+.val-warn {
+  color: #FAC775;
+}
+
+.val-danger {
+  color: #FC8585;
+}
+
+/* ---- Footer bar ---- */
+.bottombar {
+  background: #0F1117;
+  border-top: 1px solid var(--border);
+  padding: 0 20px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  bottom: 0;
+}
+
+/* ---- Spacer ---- */
+.spacer {
+  flex: 1;
+}
+
+/* ---- Timer ---- */
+.timer-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 6px 14px;
+}
+
+.timer-val {
+  font-size: 16px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+}
+
+.timer-warn {
+  color: #FAC775;
+}
+
+.timer-danger {
+  color: #FC8585;
+}

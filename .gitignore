@@ -1,0 +1,90 @@
+# ═══════════════════════════════════════════════════════════════════
+# AI Proctor Browser — .gitignore
+# ═══════════════════════════════════════════════════════════════════
+
+# ── Environment / Secrets ─────────────────────────────────────────
+# NEVER commit real .env files — they contain DB passwords and secrets
+.env
+.env.local
+.env.development
+.env.production
+backend/.env
+
+# ── Node modules ─────────────────────────────────────────────────
+node_modules/
+backend/node_modules/
+
+# ── SQLite database files (legacy — project uses PostgreSQL now) ──
+# These contain real student exam data and answers
+backend/data/*.sqlite
+backend/data/*.sqlite-shm
+backend/data/*.sqlite-wal
+backend/data/*.db
+
+# ── Evidence / Screenshot files ───────────────────────────────────
+# These are violation screenshots captured from students' webcams
+# They contain biometric/personal data — must NOT be on GitHub
+backend/evidence/
+!backend/evidence/.gitkeep
+
+# ── Log files ─────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Build / Distribution ──────────────────────────────────────────
+dist/
+dist-electron/
+out/
+build/
+release/
+*.dmg
+*.exe
+*.AppImage
+*.deb
+*.rpm
+*.zip
+*.tar.gz
+
+# ── Electron builder / packager cache ────────────────────────────
+.electron-gyp/
+electron-builder.yml.lock
+
+# ── Package lock files (optional — keep if you want reproducible installs) ──
+# Uncomment the lines below to ignore lock files
+# package-lock.json
+# backend/package-lock.json
+
+# ── OS generated files ────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── Editor / IDE ─────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ── Temporary files ──────────────────────────────────────────────
+*.tmp
+*.temp
+.cache/
+.tmp/
+
+# ── Crash reports ────────────────────────────────────────────────
+crash-reports/
+*.crash
+
+# ── Root-level analysis/scratch files (dev notes, not app code) ──
+codebase_analysis.md

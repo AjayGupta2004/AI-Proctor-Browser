@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>ProctorAI — Exam Room</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0 }
+
+    body {
+      background: #0D0F14;
+      color: #E2E4EC;
+      font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+      font-size: 14px;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ── Topbar ────────────────────────────── */
+    .topbar-exam {
+      background: #13161E;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 0 20px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #1D9E75; flex-shrink: 0 }
+    .exam-title-bar { font-size: 13px; font-weight: 500; color: #E2E4EC; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+    .exam-meta-bar { font-size: 11px; color: #5A5D6B; white-space: nowrap }
+
+    .timer-wrap {
+      display: flex; align-items: center; gap: 8px;
+      background: #1A1D28; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 6px 14px;
+    }
+    .timer-icon { width: 14px; height: 14px; flex-shrink: 0 }
+    .timer-val { font-size: 16px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: 0.04em; color: #E2E4EC }
+    .timer-val.warn { color: #EF9F27 }
+    .timer-val.danger { color: #E24B4A }
+
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0 }
+    .status-live { background: #E24B4A }
+    .status-ok { background: #1D9E75 }
+    .status-warn { background: #EF9F27 }
+
+    @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.4 } }
+    .pulse { animation: pulse 1.5s ease-in-out infinite }
+
+    /* ── Progress bar ─────────────────────── */
+    .progress-strip {
+      padding: 10px 20px 8px;
+      background: #0D0F14;
+      flex-shrink: 0;
+    }
+    .progress-row { display: flex; flex-direction: column; gap: 6px }
+    .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: #5A5D6B }
+    .progress-track { height: 3px; background: #1E2235; border-radius: 2px; overflow: hidden }
+    .progress-fill { height: 100%; background: #378ADD; border-radius: 2px; transition: width .3s }
+
+    /* ── Body grid ─────────────────────────── */
+    .exam-body {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Main question panel ───────────────── */
+    .main-panel {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border-right: 1px solid rgba(255,255,255,0.06);
+      overflow-y: auto;
+    }
+
+    /* Warning banner */
+    .warn-banner {
+      background: #2B1A10; border: 1px solid #854F0B; border-radius: 8px;
+      padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+      font-size: 12px; color: #FAC775;
+    }
+    .warn-banner.hidden { display: none }
+    .warn-banner svg { flex-shrink: 0 }
+    .warn-close {
+      margin-left: auto; cursor: pointer; color: #FAC775;
+      font-size: 16px; line-height: 1; padding: 0 2px;
+      background: none; border: none; font-family: inherit;
+    }
+
+    /* Question card */
+    .qcard {
+      background: #13161E; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 20px; flex: 1;
+    }
+    .q-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap }
+    .q-badge {
+      background: #1E2235; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px; padding: 4px 10px; font-size: 11px;
+      color: #7B7E8A; font-weight: 500;
+    }
+    .q-marks { font-size: 11px; color: #5A5D6B; margin-left: auto }
+    .q-text { font-size: 15px; line-height: 1.65; color: #D8DAE5; margin-bottom: 20px; font-weight: 400 }
+
+    /* Options */
+    .options { display: flex; flex-direction: column; gap: 8px }
+    .opt {
+      background: #1A1D28; border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px; padding: 12px 14px; cursor: pointer;
+      display: flex; align-items: center; gap: 12px;
+      transition: border-color .15s, background .15s;
+      font-size: 13px; color: #C4C6D2;
+    }
+    .opt:hover { background: #1E2235; border-color: rgba(55,138,221,0.4) }
+    .opt.selected { background: #0F1D2E; border-color: #378ADD; color: #B5D4F4 }
+    .opt-key {
+      width: 26px; height: 26px; border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 500; color: #5A5D6B;
+      flex-shrink: 0; background: #111420;
+    }
+    .opt.selected .opt-key { background: #185FA5; border-color: #378ADD; color: #B5D4F4 }
+
+    /* Question grid navigator */
+    .qgrid { display: flex; flex-wrap: wrap; gap: 5px }
+    .qnum {
+      width: 26px; height: 26px; border-radius: 5px;
+      border: 1px solid rgba(255,255,255,0.08); background: #1A1D28;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: #5A5D6B; cursor: pointer; transition: all .15s;
+    }
+    .qnum.answered { background: #0F2A1A; border-color: #1D9E75; color: #5DCAA5 }
+    .qnum.current { background: #0F1D2E; border-color: #378ADD; color: #85B7EB }
+    .qnum.flagged { background: #2B1A10; border-color: #854F0B; color: #FAC775 }
+
+    .section-label {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+      color: #3E4150; text-transform: uppercase; margin-bottom: 8px;
+    }
+
+    /* ── Bottom bar ────────────────────────── */
+    .bottom-bar {
+      background: #13161E; border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 0 20px; height: 44px; display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0;
+    }
+    .btn-er {
+      background: transparent; border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 7px; padding: 6px 16px; font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: all .15s; color: #9294A0; font-family: inherit;
+    }
+    .btn-er:hover { background: #1E2235; color: #E2E4EC; border-color: rgba(255,255,255,0.2) }
+    .btn-er:disabled { opacity: 0.35; cursor: not-allowed }
+    .btn-er.primary { background: #185FA5; border-color: #378ADD; color: #B5D4F4 }
+    .btn-er.primary:hover { background: #1D6DB8 }
+    .btn-er.flag { color: #EF9F27; border-color: rgba(239,159,39,0.3) }
+    .btn-er.flag:hover { background: #2B1A10 }
+    .btn-er.flag.active-flag { background: #2B1A10; border-color: #EF9F27 }
+    .btn-er.submit { background: #0F2A1A; border-color: #1D9E75; color: #5DCAA5 }
+    .btn-er.submit:hover { background: #0F3520 }
+    .spacer { flex: 1 }
+
+    /* ── Side panel ────────────────────────── */
+    .side-panel {
+      background: #0F1117; padding: 16px;
+      display: flex; flex-direction: column; gap: 14px;
+      overflow-y: auto;
+    }
+
+    /* Webcam */
+    .cam-wrap {
+      border-radius: 10px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      aspect-ratio: 4/3; background: #0A0B10;
+      position: relative; display: flex; align-items: center; justify-content: center;
+    }
+    .cam-wrap video {
+      width: 100%; height: 100%; object-fit: cover;
+      transform: scaleX(-1);
+    }
+    .cam-wrap canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; transform: scaleX(-1);
+    }
+    .cam-overlay {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      pointer-events: none; z-index: 2;
+    }
+    .cam-top { padding: 8px 10px; display: flex; justify-content: space-between; align-items: center }
+    .cam-badge {
+      background: rgba(229,68,68,0.15); border: 1px solid rgba(229,68,68,0.35);
+      border-radius: 5px; padding: 2px 8px; font-size: 10px; color: #FC8585;
+      display: flex; align-items: center; gap: 5px; font-weight: 500;
+    }
+    .cam-bottom { margin-top: auto; padding: 8px 10px; display: flex; gap: 6px }
+    .cam-stat {
+      background: rgba(0,0,0,0.55); border-radius: 5px; padding: 2px 8px;
+      font-size: 10px; color: #9294A0; display: flex; align-items: center; gap: 4px;
+    }
+    .cam-placeholder {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; color: #3E4150; font-size: 11px; text-align: center; padding: 20px;
+    }
+
+    /* AI signals */
+    .signal-row { display: flex; flex-direction: column; gap: 5px }
+    .signal {
+      background: #13161E; border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 7px; padding: 8px 11px; display: flex; align-items: center; gap: 9px;
+    }
+    .sig-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .sig-ok { background: #0A1F15 }
+    .sig-warn { background: #1E1308 }
+    .sig-danger { background: #1A0B0B }
+    .sig-label { font-size: 12px; color: #9294A0; flex: 1 }
+    .sig-val { font-size: 11px; font-weight: 500 }
+    .val-ok { color: #5DCAA5 }
+    .val-warn { color: #FAC775 }
+    .val-danger { color: #FC8585 }
+
+    /* Risk bar */
+    .risk-bar-wrap {
+      background: #13161E; border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px; padding: 10px 12px;
+    }
+    .risk-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px }
+    .risk-title { font-size: 11px; color: #5A5D6B }
+    .risk-val { font-size: 13px; font-weight: 500; color: #5DCAA5 }
+    .risk-track { height: 5px; background: #1E2235; border-radius: 3px; overflow: hidden }
+    .risk-fill { height: 100%; background: #1D9E75; border-radius: 3px; transition: width .6s, background .4s }
+    .risk-fill.medium { background: #EF9F27 }
+    .risk-fill.high { background: #E24B4A }
+
+    /* ── Submit confirmation modal ──────── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(8,9,14,0.88);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-backdrop.hidden { display: none }
+    .modal-box {
+      background: #13161E; border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px; width: 420px; overflow: hidden;
+    }
+    .modal-head {
+      padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .modal-title { font-size: 15px; font-weight: 600; color: #E2E4EC }
+    .modal-body { padding: 18px 20px; font-size: 13px; color: #9294A0; line-height: 1.7 }
+    .modal-body strong { color: #E2E4EC }
+    .modal-foot {
+      padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.07);
+      display: flex; gap: 10px; justify-content: flex-end;
+    }
+
+    /* ── Warning violation overlay ─────── */
+    .violation-overlay {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(8,9,14,0.92); z-index: 2000;
+    }
+    .violation-overlay.hidden { display: none }
+    .vio-modal {
+      background: #13161E; border: 1px solid rgba(226,75,74,0.35);
+      border-radius: 14px; width: 420px; overflow: hidden;
+    }
+    .vio-header {
+      background: #180A0A; border-bottom: 1px solid rgba(226,75,74,0.2);
+      padding: 18px 20px; display: flex; align-items: center; gap: 12px;
+    }
+    .alert-icon-wrap {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: #2A0E0E; border: 1px solid rgba(226,75,74,0.3);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    @keyframes shake { 0%,100% { transform: translateX(0) } 20%,60% { transform: translateX(-4px) } 40%,80% { transform: translateX(4px) } }
+    @keyframes pulse-red { 0%,100% { box-shadow: 0 0 0 0 rgba(226,75,74,0) } 50% { box-shadow: 0 0 0 6px rgba(226,75,74,0.18) } }
+    .vio-modal.entered .alert-icon-wrap { animation: shake .5s ease-in-out, pulse-red 2s 0.5s ease-in-out infinite }
+    .vio-title { font-size: 15px; font-weight: 500; color: #FC8585 }
+    .vio-sub { font-size: 11px; color: #6A2020; margin-top: 2px }
+    .vio-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px }
+    .incident-box {
+      background: #0F0808; border: 1px solid rgba(226,75,74,0.15);
+      border-radius: 9px; padding: 13px 14px;
+    }
+    .inc-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 3px 0 }
+    .inc-lbl { color: #5A3030 }
+    .inc-val { color: #C8A0A0; font-weight: 500 }
+    .inc-val-red { color: #FC8585 }
+    .vio-warning-text {
+      font-size: 13px; color: #9294A0; line-height: 1.65;
+      border-left: 2px solid rgba(226,75,74,0.4); padding-left: 12px;
+    }
+    .consequence-list { display: flex; flex-direction: column; gap: 6px }
+    .cq { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #7A5050 }
+    .cq-dot { width: 5px; height: 5px; border-radius: 50%; background: #7A2020; margin-top: 4px; flex-shrink: 0 }
+    .ack-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer }
+    .ack-check {
+      width: 15px; height: 15px; border: 1px solid rgba(226,75,74,0.4);
+      border-radius: 3px; background: #0F0808; cursor: pointer;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .ack-check.checked { background: #7A2020; border-color: #E24B4A }
+    .ack-check.checked::after { content: '✓'; font-size: 10px; color: #FC8585 }
+    .ack-lbl { font-size: 12px; color: #7A5050; cursor: pointer }
+    .vio-footer {
+      padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex; gap: 8px;
+    }
+    .btn-vio-continue {
+      flex: 1; background: #1A0B0B; border: 1px solid rgba(226,75,74,0.4);
+      border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 500;
+      color: #FC8585; cursor: pointer; transition: all .2s; opacity: 0.45;
+      font-family: inherit;
+    }
+    .btn-vio-continue.enabled { opacity: 1 }
+    .btn-vio-continue.enabled:hover { background: #2A1010 }
+    .violation-counter {
+      background: #2A0E0E; border: 1px solid rgba(226,75,74,0.3);
+      border-radius: 7px; padding: 7px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .vc-label { font-size: 11px; color: #5A3030 }
+    .vc-val { font-size: 15px; font-weight: 500; color: #FC8585 }
+    .vc-max { font-size: 11px; color: #5A3030 }
+    .color-bar { height: 3px; background: #1A0B0B; border-radius: 2px; margin-top: 6px; overflow: hidden }
+    .color-bar-fill { height: 100%; background: #E24B4A; border-radius: 2px; transition: width .5s }
+
+    /* ── Error screen ──────────────────── */
+    .error-screen {
+      display: flex; align-items: center; justify-content: center;
+      height: 100vh; flex-direction: column; gap: 12px;
+      color: #FC8585; padding: 40px; text-align: center;
+    }
+    .error-screen .err-title { font-size: 18px; font-weight: 600 }
+    .error-screen .err-msg { font-size: 13px; color: #9294A0; max-width: 500px }
+  </style>
+</head>
+
+<body>
+  <!-- ── Error screen (hidden by default) ──────── -->
+  <div id="error-screen" class="error-screen" style="display:none">
+    <div class="err-title" id="err-title">⚠ Exam Not Found</div>
+    <div class="err-msg" id="err-msg">Could not load exam data. Please return to login and try again.</div>
+    <button class="btn-er" onclick="window.location.href='login.html'" style="margin-top:12px">← Back to Login</button>
+  </div>
+
+  <!-- ── Main exam UI ──────────────────────────── -->
+  <div id="exam-ui" style="display:flex;flex-direction:column;height:100vh">
+
+    <!-- Topbar -->
+    <div class="topbar-exam">
+      <div class="logo-dot pulse"></div>
+      <div class="exam-title-bar" id="exam-title-bar">Loading…</div>
+      <div class="exam-meta-bar" id="exam-meta-bar"></div>
+      <div class="timer-wrap">
+        <svg class="timer-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="9" r="6" stroke="#5A5D6B" stroke-width="1.2"/>
+          <path d="M8 6v3.5l2 1.2" stroke="#9294A0" stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M6.5 1.5h3M8 1.5v1.5" stroke="#5A5D6B" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span class="timer-val" id="timer">--:--</span>
+      </div>
+      <div class="status-dot status-live pulse"></div>
+      <span style="font-size:11px;color:#5A5D6B">Monitored</span>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-strip">
+      <div class="progress-row">
+        <div class="progress-label">
+          <span>Question <span id="qnum-label">1</span> of <span id="total-label">0</span></span>
+          <span id="answered-count">0 answered</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="exam-body">
+      <!-- Left: Question Panel -->
+      <div class="main-panel">
+        <div class="warn-banner hidden" id="warn-banner">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0">
+            <path d="M8 2L14.5 13H1.5L8 2Z" stroke="#EF9F27" stroke-width="1.2"/>
+            <path d="M8 6v3M8 10.5v.5" stroke="#EF9F27" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <span id="warn-text"></span>
+          <button class="warn-close" onclick="dismissWarning()">×</button>
+        </div>
+
+        <div class="qcard">
+          <div class="q-header" id="q-header"></div>
+          <div class="q-text" id="q-text"></div>
+          <div class="options" id="options-list"></div>
+        </div>
+
+        <div>
+          <div class="section-label">Question navigator</div>
+          <div class="qgrid" id="qgrid"></div>
+        </div>
+      </div>
+
+      <!-- Right: Side Panel -->
+      <div class="side-panel">
+        <!-- Webcam -->
+        <div class="cam-wrap" id="cam-wrap">
+          <video id="cam-video" autoplay playsinline muted></video>
+          <canvas id="cam-canvas"></canvas>
+          <div class="cam-overlay">
+            <div class="cam-top">
+              <div class="cam-badge">
+                <div class="status-dot status-live pulse" style="width:5px;height:5px"></div>
+                Live
+              </div>
+              <div style="font-size:10px;color:rgba(255,255,255,0.25)">CAM 1</div>
+            </div>
+            <div style="flex:1"></div>
+            <div class="cam-bottom">
+              <div class="cam-stat" id="face-cam-stat">
+                <div class="status-dot status-ok" style="width:5px;height:5px" id="face-dot"></div>
+                <span id="face-cam-text">Initializing…</span>
+              </div>
+              <div class="cam-stat" id="gaze-cam">Gaze: —</div>
+            </div>
+          </div>
+          <!-- Placeholder shown when camera fails -->
+          <div class="cam-placeholder" id="cam-placeholder" style="display:none">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="#3E4150" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#3E4150" stroke-width="1.5"/></svg>
+            <span id="cam-placeholder-text">Camera unavailable</span>
+          </div>
+        </div>
+
+        <!-- AI Signals -->
+        <div>
+          <div class="section-label" style="margin-bottom:7px">AI signals</div>
+          <div class="signal-row">
+            <div class="signal" id="sig-face">
+              <div class="sig-icon sig-ok" id="sig-face-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="#1D9E75" stroke-width="1.2"/><path d="M4.5 7l1.8 1.8 3-3.6" stroke="#1D9E75" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </div>
+              <span class="sig-label">Face detected</span>
+              <span class="sig-val val-ok" id="sig-face-val">—</span>
+            </div>
+            <div class="signal" id="sig-gaze">
+              <div class="sig-icon sig-ok" id="sig-gaze-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><ellipse cx="7" cy="7" rx="5" ry="3.5" stroke="#1D9E75" stroke-width="1.2"/><circle cx="7" cy="7" r="1.5" fill="#1D9E75"/></svg>
+              </div>
+              <span class="sig-label">Gaze direction</span>
+              <span class="sig-val val-ok" id="sig-gaze-val">—</span>
+            </div>
+            <div class="signal" id="sig-tab">
+              <div class="sig-icon sig-ok" id="sig-tab-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="3" width="10" height="8" rx="1.5" stroke="#1D9E75" stroke-width="1.2"/><path d="M2 6h10" stroke="#1D9E75" stroke-width="1.2"/></svg>
+              </div>
+              <span class="sig-label">Tab activity</span>
+              <span class="sig-val val-ok" id="sig-tab-val">No switches</span>
+            </div>
+            <div class="signal">
+              <div class="sig-icon sig-ok">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="4" width="10" height="7" rx="1.5" stroke="#1D9E75" stroke-width="1.2"/><path d="M5 4V3a2 2 0 014 0v1" stroke="#1D9E75" stroke-width="1.2"/></svg>
+              </div>
+              <span class="sig-label">Environment</span>
+              <span class="sig-val val-ok">Locked</span>
+            </div>
+            <div class="signal" id="sig-audio">
+              <div class="sig-icon sig-ok" id="sig-audio-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="5" y="2" width="4" height="6" rx="2" stroke="#1D9E75" stroke-width="1.2"/><path d="M3 7.5a4 4 0 008 0M7 11.5v1.5" stroke="#1D9E75" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </div>
+              <span class="sig-label">Audio level</span>
+              <span class="sig-val val-ok" id="sig-audio-val">Quiet</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk bar -->
+        <div class="risk-bar-wrap">
+          <div class="risk-label">
+            <span class="risk-title">Risk score</span>
+            <span class="risk-val" id="risk-label">Low — 0%</span>
+          </div>
+          <div class="risk-track">
+            <div class="risk-fill" id="risk-fill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="bottom-bar">
+      <button class="btn-er" id="btn-prev" onclick="prevQ()">← Previous</button>
+      <button class="btn-er flag" id="btn-flag" onclick="flagQ()">⚑ Flag</button>
+      <div class="spacer"></div>
+      <button class="btn-er primary" id="btn-next" onclick="nextQ()">Next →</button>
+      <button class="btn-er submit" onclick="showSubmitModal()">Submit Exam</button>
+    </div>
+  </div>
+
+  <!-- ── Submit confirmation modal ─────────── -->
+  <div class="modal-backdrop hidden" id="submit-modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M8 2L14.5 13H1.5L8 2Z" stroke="#EF9F27" stroke-width="1.2"/><path d="M8 6v3M8 10.5v.5" stroke="#EF9F27" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <span class="modal-title">Submit Exam?</span>
+      </div>
+      <div class="modal-body" id="submit-modal-body">
+        Are you sure you want to submit? This action cannot be undone.
+      </div>
+      <div class="modal-foot">
+        <button class="btn-er" onclick="hideSubmitModal()">Cancel</button>
+        <button class="btn-er submit" id="btn-confirm-submit" onclick="submitExam()">Confirm Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Violation warning overlay ──────── -->
+  <div class="violation-overlay hidden" id="violation-overlay">
+    <div class="vio-modal entered" id="vio-modal">
+      <div class="vio-header">
+        <div class="alert-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 2L18 16H2L10 2Z" stroke="#E24B4A" stroke-width="1.4" fill="rgba(226,75,74,0.1)"/>
+            <path d="M10 8v4" stroke="#E24B4A" stroke-width="1.4" stroke-linecap="round"/>
+            <circle cx="10" cy="14.5" r="0.8" fill="#E24B4A"/>
+          </svg>
+        </div>
+        <div>
+          <div class="vio-title" id="vio-title">Violation detected — exam paused</div>
+          <div class="vio-sub" id="vio-sub">Incident #1 · This has been logged and sent to your proctor</div>
+        </div>
+      </div>
+
+      <div class="vio-body">
+        <div class="incident-box">
+          <div class="inc-row"><span class="inc-lbl">Violation type</span><span class="inc-val-red" id="vio-inc-type">—</span></div>
+          <div class="inc-row"><span class="inc-lbl">Detected at</span><span class="inc-val" id="vio-inc-time">—</span></div>
+          <div class="inc-row"><span class="inc-lbl">Proctor notified</span><span class="inc-val" style="color:#5DCAA5">Yes — immediately</span></div>
+          <div class="inc-row"><span class="inc-lbl">Evidence captured</span><span class="inc-val">Screenshot + timestamp</span></div>
+        </div>
+
+        <div class="violation-counter">
+          <div>
+            <div class="vc-label">Total violations this session</div>
+            <div class="color-bar" style="width:140px;margin-top:5px"><div class="color-bar-fill" id="vio-bar" style="width:0%"></div></div>
+          </div>
+          <div style="text-align:right"><span class="vc-val" id="vio-v-count">0</span><span class="vc-max" id="vio-v-max"> / 5</span></div>
+        </div>
+
+        <div class="vio-warning-text" id="vio-warn-text"></div>
+
+        <div class="consequence-list">
+          <div class="cq"><div class="cq-dot"></div><span id="vio-cq1">Next violation: automatic proctor review + exam hold</span></div>
+          <div class="cq"><div class="cq-dot"></div><span id="vio-cq2">5 violations: exam terminated, result withheld</span></div>
+        </div>
+
+        <div class="ack-row" onclick="toggleOverlayAck()">
+          <div class="ack-check" id="vio-ack-check"></div>
+          <span class="ack-lbl">I understand this was recorded. I will not repeat this action.</span>
+        </div>
+      </div>
+
+      <div class="vio-footer">
+        <button class="btn-vio-continue" id="vio-continue-btn" onclick="continueFromOverlay()">Acknowledge and resume exam</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- face-api.js for AI detection -->
+  <script src="lib/face-api.min.js"></script>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════
+    // CONFIGURATION
+    // ═══════════════════════════════════════════════════════════════
+    var BASE = 'http://localhost:4000';
+    var FACE_DETECT_INTERVAL_MS = 1500;   // detect every 1.5 s → 2 frames = ~3 s trigger
+    var AUDIO_CHECK_INTERVAL_MS = 2000;
+    var AUDIO_THRESHOLD = 45;            // 0–100 scale, above = loud
+    var NO_FACE_TOLERANCE_MS = 3000;     // trigger no_face violation after 3 s absence
+    var MULTI_FACE_TOLERANCE_MS = 3000;
+    var MAX_VIOLATIONS = 5;              // auto-terminate exam at this count
+    var SEVERE_VIOLATION_TYPES = ['tab_switch', 'no_face', 'multiple_faces', 'camera_denied', 'audio_loud', 'gaze_away'];
+    var HEALTH_CHECK_INTERVAL_MS = 30000;  // Check server health every 30s
+    var AUTO_SAVE_INTERVAL_MS = 30000;     // Auto-save answers every 30s
+    var SUBMIT_RETRY_COUNT = 3;            // Retry submit on failure
+    var SUBMIT_RETRY_DELAY_MS = 2000;      // Base delay for exponential backoff
+
+    // ═══════════════════════════════════════════════════════════════
+    // CRYPTO STORE — Encrypts answers in localStorage
+    // Uses Web Crypto API (SubtleCrypto) with AES-256-GCM
+    // ═══════════════════════════════════════════════════════════════
+    var CryptoStore = (function () {
+      var _key = null;
+      var _nonce = null;
+
+      function _textEncode(str) {
+        return new TextEncoder().encode(str);
+      }
+
+      async function init(examId, studentRoll, serverNonce) {
+        _nonce = serverNonce || 'fallback-nonce';
+        // Derive a key from examId + studentRoll + serverNonce using PBKDF2
+        var rawKey = _textEncode(examId + ':' + studentRoll + ':' + _nonce);
+        var importedKey = await crypto.subtle.importKey('raw', rawKey, 'PBKDF2', false, ['deriveKey']);
+        _key = await crypto.subtle.deriveKey(
+          { name: 'PBKDF2', salt: _textEncode('proctor-salt-v1'), iterations: 100000, hash: 'SHA-256' },
+          importedKey,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt', 'decrypt']
+        );
+      }
+
+      async function encrypt(data) {
+        if (!_key) return JSON.stringify(data); // Fallback if init failed
+        var iv = crypto.getRandomValues(new Uint8Array(12));
+        var encoded = _textEncode(JSON.stringify(data));
+        var encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, _key, encoded);
+        // Store IV + ciphertext as base64
+        var combined = new Uint8Array(iv.byteLength + encrypted.byteLength);
+        combined.set(iv, 0);
+        combined.set(new Uint8Array(encrypted), iv.byteLength);
+        return btoa(String.fromCharCode.apply(null, combined));
+      }
+
+      async function decrypt(b64) {
+        if (!_key || !b64) return null;
+        try {
+          var combined = Uint8Array.from(atob(b64), function (c) { return c.charCodeAt(0); });
+          var iv = combined.slice(0, 12);
+          var ciphertext = combined.slice(12);
+          var decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, _key, ciphertext);
+          return JSON.parse(new TextDecoder().decode(decrypted));
+        } catch (e) {
+          console.warn('[CryptoStore] Decrypt failed:', e.message);
+          return null;
+        }
+      }
+
+      async function saveAnswers(answersObj) {
+        try {
+          var encrypted = await encrypt(answersObj);
+          localStorage.setItem('enc_answers', encrypted);
+          localStorage.setItem('enc_answers_ts', String(Date.now()));
+        } catch (e) {
+          // Fallback to plain storage if encryption fails
+          localStorage.setItem('enc_answers', JSON.stringify(answersObj));
+        }
+      }
+
+      async function loadAnswers() {
+        var stored = localStorage.getItem('enc_answers');
+        if (!stored) return null;
+        try {
+          // Try decrypting first
+          var result = await decrypt(stored);
+          if (result) return result;
+          // Fallback: try plain JSON
+          return JSON.parse(stored);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      return { init: init, saveAnswers: saveAnswers, loadAnswers: loadAnswers, encrypt: encrypt, decrypt: decrypt };
+    })();
+
+    // ═══════════════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════════════
+    var examData = null;       // full exam object from API
+    var questions = [];        // array of question objects
+    var totalQ = 0;
+    var currentIdx = 0;        // 0-based index of current question
+    var answers = {};          // { questionId: selectedOptionIndex (string) }
+    var flagged = {};          // { questionId: true }
+    var sessionId = null;
+    var studentName = '';
+    var studentRoll = '';
+    var examCode = '';
+    var secondsLeft = 0;
+    var timerInterval = null;
+    var startTimestamp = Date.now();
+    var violationCount = 0;
+    var riskPct = 0;
+    var tabSwitchCount = 0;
+    var isSubmitting = false;
+    var isSubmitted = false;
+    var timelineEvents = [];
+    var overlayVisible = false;
+    var timerPaused = false;
+    var overlayAcked = false;
+    var serverOnline = true;
+    var healthCheckTimer = null;
+    var autoSaveTimer = null;
+    var faceApiAvailable = true;  // Track if face-api is usable
+    var examStartGracePeriod = true; // Suppress violation UI for first 5s while models/camera init
+
+    // AI state
+    var faceModelsLoaded = false;
+    var videoStream = null;
+    var audioContext = null;
+    var audioAnalyser = null;
+    var lastNoFaceTime = 0;
+    var lastMultiFaceTime = 0;
+    var consecutiveNoFace = 0;
+    var consecutiveMultiFace = 0;
+    var consecutiveGazeAway = 0;  // Must reach 3 consecutive detections before gaze violation fires
+    var faceDetectTimer = null;
+    var audioCheckTimer = null;
+
+    // ═══════════════════════════════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════════════════════════════
+    (function init() {
+      // 1. Load exam data from localStorage
+      try { examData = JSON.parse(localStorage.getItem('exam_data')); } catch (e) { examData = null; }
+      studentName = localStorage.getItem('student_name') || 'Student';
+      studentRoll = localStorage.getItem('student_roll') || 'N/A';
+      examCode = localStorage.getItem('exam_code') || '';
+
+      if (!examData || !examData.questions || !examData.questions.length) {
+        showError('Exam Data Missing', 'No exam data found. Please return to login, enter a valid exam code, and try again.');
+        return;
+      }
+
+      questions = examData.questions;
+      totalQ = questions.length;
+      secondsLeft = (examData.duration || 60) * 60;
+
+      // 2. Populate UI
+      document.getElementById('exam-title-bar').textContent = examData.title || 'Exam';
+      document.getElementById('exam-meta-bar').textContent =
+        'Candidate: ' + escHtml(studentName) + '  |  Roll: ' + escHtml(studentRoll);
+      document.getElementById('total-label').textContent = totalQ;
+
+      // 3. Handle backtracking setting
+      if (!examData.allowBacktrack) {
+        document.getElementById('btn-prev').disabled = true;
+        document.getElementById('btn-prev').style.opacity = '0.3';
+      }
+
+      // 4. Render first question & grid
+      renderQuestion();
+      buildGrid();
+      updateProgress();
+
+      // 5. Start timer
+      updateTimerDisplay();
+      timerInterval = setInterval(tick, 1000);
+
+      // 6. Create session on backend (with kiosk attestation)
+      createSession();
+
+      // 7. Start webcam & AI
+      startWebcam();
+
+      // 8. Tab visibility detection
+      document.addEventListener('visibilitychange', onVisibilityChange);
+
+      // 8b. Start health check & auto-save
+      healthCheckTimer = setInterval(checkServerHealth, HEALTH_CHECK_INTERVAL_MS);
+      autoSaveTimer = setInterval(autoSaveAnswers, AUTO_SAVE_INTERVAL_MS);
+
+      // 9. Listen for warnings from Electron main process
+      if (window.electronAPI && window.electronAPI.onWarning) {
+        window.electronAPI.onWarning(function (msg) {
+          // Detect violation type from the message and show overlay for severe events
+          var lc = (msg || '').toLowerCase();
+          if (lc.indexOf('tab') !== -1 || lc.indexOf('switch') !== -1) {
+            showViolationOverlay('tab_switch', msg);
+          } else if (lc.indexOf('face') !== -1 && lc.indexOf('multiple') !== -1) {
+            showViolationOverlay('multiple_faces', msg);
+          } else if (lc.indexOf('face') !== -1 && (lc.indexOf('no ') !== -1 || lc.indexOf('not ') !== -1 || lc.indexOf('lost') !== -1)) {
+            showViolationOverlay('no_face', msg);
+          } else if (lc.indexOf('audio') !== -1 || lc.indexOf('voice') !== -1) {
+            showViolationOverlay('audio_loud', msg);
+          } else if (lc.indexOf('screen') !== -1 || lc.indexOf('capture') !== -1) {
+            showViolationOverlay('camera_denied', msg);
+          } else {
+            showWarning(msg);
+          }
+        });
+      }
+
+      // 10. Listen for auto-submit from main process (power suspend, screen lock)
+      if (window.electronAPI && window.electronAPI.onAutoSubmit) {
+        window.electronAPI.onAutoSubmit(function (data) {
+          var reason = (data && data.reason) || 'System event (auto-submit)';
+          addTimelineEvent('auto-submit', reason);
+          submitExam(true);
+        });
+      }
+
+      // 11. Set student/exam IDs in main process
+      if (window.electronAPI) {
+        if (window.electronAPI.setStudentId) window.electronAPI.setStudentId(studentRoll);
+        if (window.electronAPI.setExamId) window.electronAPI.setExamId(examData.id);
+      }
+
+      // Show the exam UI
+      document.getElementById('exam-ui').style.display = 'flex';
+
+      // Startup grace period: suppress all violation UI for the first 5 seconds.
+      // Gives the webcam stream, AudioContext, and face-api models time to fully
+      // initialise before any detection can show a warning to the student.
+      setTimeout(function () {
+        examStartGracePeriod = false;
+        console.log('[ExamRoom] Startup grace period ended — violations now active.');
+      }, 5000);
+    })();
+
+    // ═══════════════════════════════════════════════════════════════
+    // SESSION
+    // ═══════════════════════════════════════════════════════════════
+    function createSession() {
+      // Get kiosk attestation from Electron (if available)
+      var attestationPromise = (window.electronAPI && window.electronAPI.getKioskAttestation)
+        ? window.electronAPI.getKioskAttestation()
+        : Promise.resolve(null);
+
+      attestationPromise.then(function (attestation) {
+        return fetch(BASE + '/api/student/exam/' + encodeURIComponent(examCode) + '/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            studentName: studentName,
+            studentRoll: studentRoll,
+            kioskAttestation: attestation
+          })
+        });
+      }).then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data.sessionId) sessionId = data.sessionId;
+          // Initialize CryptoStore with the server-provided nonce
+          if (data.cryptoNonce && examData) {
+            CryptoStore.init(examData.id || '', studentRoll, data.cryptoNonce)
+              .catch(function (e) { console.warn('[CryptoStore] Init failed:', e); });
+          }
+        }).catch(function (err) {
+          console.warn('[ExamRoom] Session creation failed:', err);
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // QUESTION RENDERING
+    // ═══════════════════════════════════════════════════════════════
+    function renderQuestion() {
+      var q = questions[currentIdx];
+      if (!q) return;
+
+      // Header
+      var headerEl = document.getElementById('q-header');
+      var badgeHtml = '<div class="q-badge">Q' + (currentIdx + 1) + '</div>';
+      if (examData.subject) {
+        badgeHtml += '<div class="q-badge" style="background:#1A1328;border-color:rgba(127,119,221,0.3);color:#AFA9EC">' + escHtml(examData.subject) + '</div>';
+      }
+      badgeHtml += '<div class="q-marks">' + (q.marks || 1) + ' mark' + ((q.marks || 1) > 1 ? 's' : '') + '</div>';
+      headerEl.innerHTML = badgeHtml;
+
+      // Question text
+      document.getElementById('q-text').textContent = q.text || '';
+
+      // Options
+      var optList = document.getElementById('options-list');
+      optList.innerHTML = '';
+      var keys = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+      var opts = q.options || [];
+
+      for (var i = 0; i < opts.length; i++) {
+        var div = document.createElement('div');
+        var isSelected = answers[q.id] === String(i);
+        div.className = 'opt' + (isSelected ? ' selected' : '');
+        div.setAttribute('data-idx', i);
+        div.innerHTML = '<div class="opt-key">' + (keys[i] || (i + 1)) + '</div><span>' + escHtml(opts[i]) + '</span>';
+        div.onclick = (function (idx) {
+          return function () { selectOption(idx); };
+        })(i);
+        optList.appendChild(div);
+      }
+
+      // Update navigation label
+      document.getElementById('qnum-label').textContent = currentIdx + 1;
+
+      // Update flag button state
+      var flagBtn = document.getElementById('btn-flag');
+      if (flagged[q.id]) {
+        flagBtn.classList.add('active-flag');
+        flagBtn.textContent = '⚑ Unflag';
+      } else {
+        flagBtn.classList.remove('active-flag');
+        flagBtn.textContent = '⚑ Flag';
+      }
+    }
+
+    function selectOption(optIdx) {
+      var q = questions[currentIdx];
+      answers[q.id] = String(optIdx);
+
+      // Encrypt and save to localStorage
+      CryptoStore.saveAnswers(answers).catch(function () {});
+
+      // Update UI
+      var opts = document.querySelectorAll('#options-list .opt');
+      for (var i = 0; i < opts.length; i++) {
+        if (parseInt(opts[i].getAttribute('data-idx')) === optIdx) {
+          opts[i].classList.add('selected');
+        } else {
+          opts[i].classList.remove('selected');
+        }
+      }
+
+      buildGrid();
+      updateProgress();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // NAVIGATION
+    // ═══════════════════════════════════════════════════════════════
+    function nextQ() {
+      if (currentIdx < totalQ - 1) {
+        currentIdx++;
+        renderQuestion();
+        buildGrid();
+      }
+    }
+
+    function prevQ() {
+      if (!examData.allowBacktrack) return;
+      if (currentIdx > 0) {
+        currentIdx--;
+        renderQuestion();
+        buildGrid();
+      }
+    }
+
+    function goToQ(idx) {
+      if (!examData.allowBacktrack && idx < currentIdx) return;
+      if (idx >= 0 && idx < totalQ) {
+        currentIdx = idx;
+        renderQuestion();
+        buildGrid();
+      }
+    }
+
+    function flagQ() {
+      var q = questions[currentIdx];
+      if (flagged[q.id]) {
+        delete flagged[q.id];
+      } else {
+        flagged[q.id] = true;
+      }
+      renderQuestion();
+      buildGrid();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // QUESTION GRID
+    // ═══════════════════════════════════════════════════════════════
+    function buildGrid() {
+      var g = document.getElementById('qgrid');
+      g.innerHTML = '';
+      for (var i = 0; i < totalQ; i++) {
+        var q = questions[i];
+        var div = document.createElement('div');
+        var cls = 'qnum';
+        if (i === currentIdx) cls += ' current';
+        else if (answers[q.id] !== undefined) cls += ' answered';
+        else if (flagged[q.id]) cls += ' flagged';
+        div.className = cls;
+        div.textContent = i + 1;
+        div.onclick = (function (idx) { return function () { goToQ(idx); }; })(i);
+        g.appendChild(div);
+      }
+    }
+
+    function updateProgress() {
+      var answeredArr = Object.keys(answers);
+      var count = answeredArr.length;
+      document.getElementById('answered-count').textContent = count + ' answered';
+      document.getElementById('prog-fill').style.width = Math.round(count / totalQ * 100) + '%';
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TIMER
+    // ═══════════════════════════════════════════════════════════════
+    function tick() {
+      if (secondsLeft <= 0 || isSubmitted) {
+        clearInterval(timerInterval);
+        if (!isSubmitted) {
+          addTimelineEvent('time-up', 'Timer expired — auto-submitting exam.');
+          submitExam(true);
+        }
+        return;
+      }
+      // Freeze countdown while violation overlay is visible
+      if (timerPaused) return;
+      secondsLeft--;
+      updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+      var m = Math.floor(secondsLeft / 60);
+      var s = secondsLeft % 60;
+      var str = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      var tv = document.getElementById('timer');
+      tv.textContent = str;
+      if (secondsLeft < 300) tv.className = 'timer-val danger';
+      else if (secondsLeft < 600) tv.className = 'timer-val warn';
+      else tv.className = 'timer-val';
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // WEBCAM
+    // ═══════════════════════════════════════════════════════════════
+    function startWebcam() {
+      var video = document.getElementById('cam-video');
+      var constraints = { video: { width: 320, height: 240, facingMode: 'user' }, audio: true };
+
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then(function (stream) {
+          videoStream = stream;
+          video.srcObject = stream;
+          video.play();
+
+          // Start audio monitoring from the same stream
+          startAudioMonitoring(stream);
+
+          // Load face-api models then start detection
+          loadFaceModels();
+        })
+        .catch(function (err) {
+          console.warn('[ExamRoom] Camera/mic access failed:', err);
+          document.getElementById('cam-video').style.display = 'none';
+          document.getElementById('cam-placeholder').style.display = 'flex';
+          document.getElementById('cam-placeholder-text').textContent = 'Camera access denied. Grant permissions and refresh.';
+          updateSignal('face', 'danger', 'No camera');
+          reportViolation('camera_denied', 'Camera/microphone access was denied.', 'high');
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // FACE DETECTION (face-api.js)
+    // ═══════════════════════════════════════════════════════════════
+    function loadFaceModels() {
+      if (typeof faceapi === 'undefined') {
+        console.warn('[ExamRoom] face-api.js not loaded, skipping face detection.');
+        faceApiAvailable = false;
+        updateSignal('face', 'warn', 'Unavailable');
+        // Show a single info banner — this is NOT a student violation, do not call reportViolation
+        showWarning('⚠ Face detection unavailable — session will be flagged for manual review.');
+        return;
+      }
+
+      // Always use the relative path — avoids file:// URL percent-encoding issues.
+      // The IPC getModelsBaseUrl() returns a file:// URL that may contain %20 for spaces
+      // (e.g. "ai-proctor-browser copy"), which causes fetch() inside face-api to fail.
+      var loadPromise = loadModelsFromPath('./models');
+
+      loadPromise.then(function () {
+        faceModelsLoaded = true;
+        updateSignal('face', 'ok', '—');
+        document.getElementById('face-cam-text').textContent = 'Loading…';
+        // Start detection loop
+        faceDetectTimer = setInterval(runFaceDetection, FACE_DETECT_INTERVAL_MS);
+        // Delay first run by 2s so the webcam video stream reaches readyState >= 2
+        // before face-api tries to process the first frame.
+        setTimeout(runFaceDetection, 2000);
+      }).catch(function (err) {
+        console.warn('[ExamRoom] Face model loading failed:', err);
+        faceApiAvailable = false;
+        updateSignal('face', 'warn', 'Model error');
+        // Show single info banner — NOT a student violation, do not call reportViolation
+        showWarning('⚠ Face detection unavailable — session will be flagged for manual review.');
+      });
+    }
+
+    function loadModelsFromPath(path) {
+      return Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(path),
+        faceapi.nets.faceLandmark68TinyNet.loadFromUri(path)
+      ]);
+    }
+
+    function runFaceDetection() {
+      if (!faceModelsLoaded || isSubmitted) return;
+      var video = document.getElementById('cam-video');
+      if (!video || video.paused || video.ended || video.readyState < 2) return;
+
+      var options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 });
+
+      faceapi.detectAllFaces(video, options).withFaceLandmarks(true).then(function (detections) {
+        var count = detections.length;
+        var now = Date.now();
+
+        // Draw bounding boxes on the overlay canvas
+        drawFaceBoxes(detections);
+
+        // Update face status
+        if (count === 0) {
+          consecutiveNoFace++;
+          consecutiveMultiFace = 0;
+          if (lastNoFaceTime === 0) lastNoFaceTime = now;
+
+          document.getElementById('face-cam-text').textContent = 'No face';
+          document.getElementById('face-dot').className = 'status-dot status-warn';
+          document.getElementById('face-dot').style.width = '5px';
+          document.getElementById('face-dot').style.height = '5px';
+          updateSignal('face', 'warn', 'No face');
+
+          if (now - lastNoFaceTime > NO_FACE_TOLERANCE_MS && consecutiveNoFace >= 2) {
+            reportViolation('no_face', 'Face not detected in camera.', 'high');
+            lastNoFaceTime = now; // reset to avoid spamming
+            consecutiveNoFace = 0;
+          }
+        } else if (count > 1) {
+          consecutiveMultiFace++;
+          consecutiveNoFace = 0;
+          lastNoFaceTime = 0;
+
+          document.getElementById('face-cam-text').textContent = count + ' faces';
+          document.getElementById('face-dot').className = 'status-dot status-warn';
+          document.getElementById('face-dot').style.width = '5px';
+          document.getElementById('face-dot').style.height = '5px';
+          updateSignal('face', 'danger', count + ' faces!');
+
+          if (consecutiveMultiFace >= 2) {
+            reportViolation('multiple_faces', count + ' faces detected in camera frame.', 'critical');
+            consecutiveMultiFace = 0;
+          }
+        } else {
+          consecutiveNoFace = 0;
+          consecutiveMultiFace = 0;
+          lastNoFaceTime = 0;
+
+          document.getElementById('face-cam-text').textContent = 'Face OK';
+          document.getElementById('face-dot').className = 'status-dot status-ok';
+          document.getElementById('face-dot').style.width = '5px';
+          document.getElementById('face-dot').style.height = '5px';
+          updateSignal('face', 'ok', '1 face');
+
+          // Gaze detection via landmarks
+          if (detections[0] && detections[0].landmarks) {
+            analyzeGaze(detections[0].landmarks);
+          }
+        }
+      }).catch(function (err) {
+        console.warn('[ExamRoom] Face detection error:', err);
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // FACE BOUNDING BOX DRAWING
+    // ═══════════════════════════════════════════════════════════════
+    function drawFaceBoxes(detections) {
+      var canvas = document.getElementById('cam-canvas');
+      var video = document.getElementById('cam-video');
+      if (!canvas || !video) return;
+
+      var ctx = canvas.getContext('2d');
+      var vw = video.videoWidth || 320;
+      var vh = video.videoHeight || 240;
+
+      // Sync canvas internal resolution to match the video
+      if (canvas.width !== vw || canvas.height !== vh) {
+        canvas.width = vw;
+        canvas.height = vh;
+      }
+
+      // Clear previous frame
+      ctx.clearRect(0, 0, vw, vh);
+
+      if (!detections || detections.length === 0) return;
+
+      var count = detections.length;
+      // Green = 1 face (safe), Red = multiple faces (violation)
+      var color     = count === 1 ? '#1D9E75' : '#E24B4A';
+      var glowColor = count === 1 ? 'rgba(29,158,117,0.18)' : 'rgba(226,75,74,0.18)';
+
+      for (var i = 0; i < count; i++) {
+        var box = detections[i].detection.box;
+        var x = box.x;
+        var y = box.y;
+        var w = box.width;
+        var h = box.height;
+
+        // Corner bracket length: 20% of shorter side, clamped 12–30px
+        var cl = Math.max(Math.min(Math.min(w, h) * 0.20, 30), 12);
+        var r  = 5;   // corner radius for the bracket curves
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth   = 1.5;
+        ctx.lineCap     = 'round';
+        ctx.lineJoin    = 'round';
+        ctx.shadowColor = glowColor;
+        ctx.shadowBlur  = 8;
+
+        // ── Top-left ──────────────────────────────────
+        ctx.beginPath();
+        ctx.moveTo(x, y + cl);
+        ctx.lineTo(x, y + r);
+        ctx.arcTo(x, y, x + r, y, r);
+        ctx.lineTo(x + cl, y);
+        ctx.stroke();
+
+        // ── Top-right ─────────────────────────────────
+        ctx.beginPath();
+        ctx.moveTo(x + w - cl, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.arcTo(x + w, y, x + w, y + r, r);
+        ctx.lineTo(x + w, y + cl);
+        ctx.stroke();
+
+        // ── Bottom-left ───────────────────────────────
+        ctx.beginPath();
+        ctx.moveTo(x, y + h - cl);
+        ctx.lineTo(x, y + h - r);
+        ctx.arcTo(x, y + h, x + r, y + h, r);
+        ctx.lineTo(x + cl, y + h);
+        ctx.stroke();
+
+        // ── Bottom-right ──────────────────────────────
+        ctx.beginPath();
+        ctx.moveTo(x + w - cl, y + h);
+        ctx.lineTo(x + w - r, y + h);
+        ctx.arcTo(x + w, y + h, x + w, y + h - r, r);
+        ctx.lineTo(x + w, y + h - cl);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // Compact label above the first face
+      if (detections.length > 0) {
+        var firstBox  = detections[0].detection.box;
+        var labelText = count === 1 ? 'Face OK' : count + ' Faces';
+        var labelBg   = count === 1 ? 'rgba(10,31,21,0.88)' : 'rgba(26,11,11,0.88)';
+
+        ctx.save();
+        ctx.font = '500 10px system-ui, -apple-system, sans-serif';
+        var textWidth = ctx.measureText(labelText).width;
+        var labelX = firstBox.x;
+        var labelY = firstBox.y - 6;
+        var padX   = 5;
+        var labelH = 14;
+        var lx = labelX - padX;
+        var ly = labelY - labelH;
+        var lw = textWidth + padX * 2;
+        var lh = labelH + 3;
+        var lr = 3;
+
+        // Background pill
+        ctx.fillStyle = labelBg;
+        ctx.beginPath();
+        ctx.moveTo(lx + lr, ly);
+        ctx.lineTo(lx + lw - lr, ly);
+        ctx.arcTo(lx + lw, ly, lx + lw, ly + lr, lr);
+        ctx.lineTo(lx + lw, ly + lh - lr);
+        ctx.arcTo(lx + lw, ly + lh, lx + lw - lr, ly + lh, lr);
+        ctx.lineTo(lx + lr, ly + lh);
+        ctx.arcTo(lx, ly + lh, lx, ly + lh - lr, lr);
+        ctx.lineTo(lx, ly + lr);
+        ctx.arcTo(lx, ly, lx + lr, ly, lr);
+        ctx.closePath();
+        ctx.fill();
+
+        // Hairline border
+        ctx.strokeStyle = color;
+        ctx.lineWidth   = 0.8;
+        ctx.shadowBlur  = 0;
+        ctx.stroke();
+
+        // Text
+        ctx.fillStyle    = color;
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(labelText, labelX, labelY);
+        ctx.restore();
+      }
+    }
+
+
+    // ═══════════════════════════════════════════════════════════════
+    // GAZE ANALYSIS — multi-signal: head-pose + eye asymmetry + iris estimate
+    //
+    // face-api's 68-landmark model does NOT include iris points, so we use
+    // three independent approximations and combine them:
+    //
+    //  A) Head Yaw  — how far the nose tip is from the inter-eye midpoint,
+    //                 normalised to the inter-eye span.  Most reliable signal
+    //                 for head rotation.
+    //
+    //  B) Eye-width asymmetry — when the face turns sideways, the far eye
+    //                 appears narrower than the near eye (perspective
+    //                 foreshortening). Ratio of width difference to total width.
+    //
+    //  C) Iris centroid — the centroid of each eye's 6 contour points is a
+    //                 rough proxy for where the iris sits. Normalised to
+    //                 [0..1] within the eye's bounding-box width.
+    //                 ~0.5 = looking straight; deviation = gaze shift.
+    //
+    // One strong signal OR any two weaker signals together → "looking away"
+    // ═══════════════════════════════════════════════════════════════
+    function analyzeGaze(landmarks) {
+      try {
+        var nose     = landmarks.getNose();
+        var leftEye  = landmarks.getLeftEye();
+        var rightEye = landmarks.getRightEye();
+
+        if (!nose || !leftEye || !rightEye ||
+            nose.length < 4 || leftEye.length < 4 || rightEye.length < 4) {
+          return; // landmarks not resolved — skip this frame silently
+        }
+
+        // ── Left eye: centroid + bounding-box width ────────────────
+        var lxSum = 0, lxMin = Infinity, lxMax = -Infinity;
+        for (var i = 0; i < leftEye.length; i++) {
+          lxSum += leftEye[i].x;
+          if (leftEye[i].x < lxMin) lxMin = leftEye[i].x;
+          if (leftEye[i].x > lxMax) lxMax = leftEye[i].x;
+        }
+        var leftEyeX = lxSum / leftEye.length;
+        var leftEyeW = lxMax - lxMin;
+
+        // ── Right eye: centroid + bounding-box width ───────────────
+        var rxSum = 0, rxMin = Infinity, rxMax = -Infinity;
+        for (var i = 0; i < rightEye.length; i++) {
+          rxSum += rightEye[i].x;
+          if (rightEye[i].x < rxMin) rxMin = rightEye[i].x;
+          if (rightEye[i].x > rxMax) rxMax = rightEye[i].x;
+        }
+        var rightEyeX = rxSum / rightEye.length;
+        var rightEyeW = rxMax - rxMin;
+
+        // Guarantee camera-left variables always contain the left eye
+        if (leftEyeX > rightEyeX) {
+          var t;
+          t = leftEyeX; leftEyeX = rightEyeX; rightEyeX = t;
+          t = leftEyeW; leftEyeW = rightEyeW; rightEyeW = t;
+          t = lxMin; lxMin = rxMin; rxMin = t;
+        }
+
+        var eyeSpan = rightEyeX - leftEyeX;
+        if (eyeSpan < 10) return; // face too small / eyes not resolved
+
+        // ── Signal A: Head Yaw ─────────────────────────────────────
+        // nose[6] = landmark 33 = nose bottom-centre (true tip)
+        var noseTipX = (nose[6] || nose[4] || nose[3] || nose[0]).x;
+        var midX     = (leftEyeX + rightEyeX) / 2;
+        var yawRatio = Math.abs((noseTipX - midX) / eyeSpan);
+        // 0.00–0.14 = straight | 0.22+ = clearly turned sideways
+
+        // ── Signal B: Eye-width asymmetry ──────────────────────────
+        var totalW    = leftEyeW + rightEyeW;
+        var asymmetry = totalW > 4 ? Math.abs(leftEyeW - rightEyeW) / totalW : 0;
+        // 0.00–0.20 = symmetric | 0.28+ = one eye noticeably narrower
+
+        // ── Signal C: Iris centroid position within eye socket ──────
+        // (centroid − outer_corner) / eye_width  ∈  [0 .. 1]
+        // ~0.5 = iris centred | deviation > 0.16 = notable iris shift
+        var leftIrisRatio  = leftEyeW  > 4 ? (leftEyeX  - lxMin) / leftEyeW  : 0.5;
+        var rightIrisRatio = rightEyeW > 4 ? (rightEyeX - rxMin) / rightEyeW : 0.5;
+        var irisDeviation  = Math.abs(((leftIrisRatio + rightIrisRatio) / 2) - 0.5);
+
+        // ── Weighted voting ────────────────────────────────────────
+        var strongHead   = yawRatio   > 0.22;   // obvious head rotation
+        var moderateHead = yawRatio   > 0.15;   // moderate head rotation
+        var eyesAsymm    = asymmetry  > 0.28;   // eye widths very unequal
+        var irisOff      = irisDeviation > 0.16; // iris centroid off-centre
+
+        var lookingAway = strongHead                    ||   // clear head turn alone
+                          (moderateHead && eyesAsymm)  ||   // head + width mismatch
+                          (moderateHead && irisOff)    ||   // head + iris shift
+                          (eyesAsymm    && irisOff);        // both eye signals agree
+
+        if (lookingAway) {
+          consecutiveGazeAway++;
+          updateSignal('gaze', 'warn', 'Away');
+          document.getElementById('gaze-cam').textContent = 'Gaze: away';
+          // With FACE_DETECT_INTERVAL_MS = 1500 ms:
+          //   2 consecutive detections = 1.5 s × 2 = ~3 s of continuous gaze away
+          if (consecutiveGazeAway >= 2) {
+            reportViolation('gaze_away', 'Student appears to be looking away from the screen.', 'medium');
+            consecutiveGazeAway = 0;
+          }
+        } else {
+          consecutiveGazeAway = 0;
+          updateSignal('gaze', 'ok', 'Screen');
+          document.getElementById('gaze-cam').textContent = 'Gaze: forward';
+        }
+      } catch (e) {
+        // Silently ignore gaze analysis errors to avoid disrupting the exam
+      }
+    }
+
+
+
+    // ═══════════════════════════════════════════════════════════════
+    // AUDIO MONITORING
+    // ═══════════════════════════════════════════════════════════════
+    function startAudioMonitoring(stream) {
+      try {
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AudioCtx();
+        var source = audioContext.createMediaStreamSource(stream);
+        audioAnalyser = audioContext.createAnalyser();
+        audioAnalyser.fftSize = 256;
+        source.connect(audioAnalyser);
+        // Don't connect to destination (we don't want to play back audio)
+        audioCheckTimer = setInterval(checkAudioLevel, AUDIO_CHECK_INTERVAL_MS);
+      } catch (e) {
+        console.warn('[ExamRoom] Audio monitoring setup failed:', e);
+      }
+    }
+
+    function checkAudioLevel() {
+      if (!audioAnalyser || isSubmitted) return;
+      var data = new Uint8Array(audioAnalyser.frequencyBinCount);
+      audioAnalyser.getByteFrequencyData(data);
+
+      // Calculate average level (0–255 → 0–100)
+      var sum = 0;
+      for (var i = 0; i < data.length; i++) sum += data[i];
+      var avg = (sum / data.length) / 2.55;
+
+      if (avg > AUDIO_THRESHOLD) {
+        updateSignal('audio', 'warn', 'Loud');
+        reportViolation('audio_loud', 'Unusual audio activity detected (level: ' + Math.round(avg) + '%).', 'medium');
+      } else if (avg > AUDIO_THRESHOLD * 0.6) {
+        updateSignal('audio', 'warn', 'Moderate');
+      } else {
+        updateSignal('audio', 'ok', 'Quiet');
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TAB VISIBILITY
+    // ═══════════════════════════════════════════════════════════════
+    function onVisibilityChange() {
+      // Ignore any visibility change during the startup grace period.
+      // The browser fires this event during the navigation from instructions.html,
+      // which would falsely count as a tab switch before the exam even begins.
+      if (examStartGracePeriod) return;
+
+      if (document.hidden && !isSubmitted) {
+        tabSwitchCount++;
+        // reportViolation now handles showing the overlay or banner internally
+        reportViolation('tab_switch', 'Tab or window switch detected (count: ' + tabSwitchCount + ').', tabSwitchCount >= 3 ? 'high' : 'medium');
+
+        // Update signal
+        var severity = tabSwitchCount >= 3 ? 'danger' : 'warn';
+        updateSignal('tab', severity, tabSwitchCount + ' switch' + (tabSwitchCount > 1 ? 'es' : ''));
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // VIOLATION REPORTING
+    // ═══════════════════════════════════════════════════════════════
+    var violationTypes = {
+      tab_switch:      { title: 'Violation detected — exam paused',     sub: 'Incident #{n} · Tab switch logged and sent to proctor',          label: 'Tab switch detected',             text: 'Your browser left the exam window. Each tab switch is recorded and reviewed by your proctor. If this was accidental, acknowledge below and resume. Repeated violations may result in automatic disqualification.', cq1: 'Next violation: automatic proctor review + exam hold', cq2: '{max} violations: exam terminated, result withheld' },
+      multiple_faces:  { title: 'Multiple persons detected — exam paused', sub: 'Incident #{n} · Camera flag sent to proctor immediately',       label: 'Multiple faces in camera frame',  text: 'More than one person detected in your camera feed. Ensure you are alone during this examination. Your proctor has been alerted.', cq1: 'Ensure no other person is visible to your camera', cq2: 'Persistent flag will trigger proctor intervention' },
+      no_face:         { title: 'Face not detected — exam timer paused',   sub: 'Camera monitoring interrupted · Reposition yourself',            label: 'No face in camera frame',         text: 'Your face is no longer visible in the camera frame. Please reposition yourself in front of the camera. The exam timer has been paused until you are redetected.', cq1: 'Timer resumes only when face is redetected', cq2: 'Extended absence triggers proctor manual review' },
+      audio_loud:      { title: 'Audio anomaly detected — exam paused',    sub: 'Incident #{n} · Microphone flag sent to proctor',                label: 'Unusual audio / second voice detected', text: 'Unusual audio activity was detected by your microphone. All audio is being recorded. Ensure no one is assisting you and maintain a quiet environment.', cq1: 'All microphone input during this exam is recorded', cq2: 'Continued audio violations trigger automatic review' },
+      camera_denied:   { title: 'Camera access denied — severe violation', sub: 'Incident #{n} · Escalated to senior proctor immediately',         label: 'Camera / microphone access denied', text: 'Camera and microphone access is required for AI proctoring. Without camera access, the exam cannot verify your identity. This has been escalated to your proctor.', cq1: 'Grant camera permissions and refresh the page', cq2: 'Exam may be terminated pending proctor review' },
+      gaze_away:       { title: 'Gaze deviation detected',                sub: 'Incident #{n} · Gaze flag logged',                                label: 'Looking away from screen',        text: 'You appear to be looking away from the screen. Please keep your eyes on the exam. This incident has been recorded.', cq1: 'Keep your gaze focused on the screen', cq2: 'Repeated gaze deviations increase risk score' }
+    };
+
+    function reportViolation(type, detail, severity) {
+      // During the startup grace period, suppress ALL violation processing.
+      // This prevents false alerts while the webcam stream, AudioContext, and
+      // face-api models are still initialising (first 5 seconds after page load).
+      if (examStartGracePeriod) {
+        console.log('[ExamRoom] Grace period — suppressed violation:', type, '|', detail);
+        return;
+      }
+      violationCount++;
+      addTimelineEvent(type, detail);
+
+      // Update risk score
+      var increment = 10;
+      if (severity === 'critical') increment = 25;
+      else if (severity === 'high') increment = 15;
+      else if (severity === 'medium') increment = 10;
+      riskPct = Math.min(riskPct + increment, 100);
+      updateRisk();
+
+      // Report to Electron main process
+      if (window.electronAPI && window.electronAPI.reportViolation) {
+        window.electronAPI.reportViolation({
+          type: type,
+          detail: detail,
+          severity: severity || 'medium',
+          timestamp: Date.now()
+        });
+      }
+
+      // Capture screenshot evidence
+      captureScreenshot();
+
+      // Check if max violations reached → auto-terminate
+      if (violationCount >= MAX_VIOLATIONS) {
+        addTimelineEvent('auto-terminate', 'Maximum violations (' + MAX_VIOLATIONS + ') reached — exam auto-terminated.');
+        submitExam(true);
+        return;
+      }
+
+      // Show fullscreen overlay for severe violations, banner for mild ones
+      if (SEVERE_VIOLATION_TYPES.indexOf(type) !== -1 && severity !== 'low') {
+        showViolationOverlay(type, detail);
+      } else {
+        showWarning(detail);
+      }
+    }
+
+    function captureScreenshot() {
+      try {
+        var video = document.getElementById('cam-video');
+        if (!video || video.readyState < 2) return;
+        var canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 320;
+        canvas.height = video.videoHeight || 240;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+        if (window.electronAPI && window.electronAPI.sendScreenshot) {
+          window.electronAPI.sendScreenshot(dataUrl);
+        }
+      } catch (e) { /* silent */ }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TIMELINE EVENTS (for post-exam report)
+    // ═══════════════════════════════════════════════════════════════
+    function addTimelineEvent(type, detail) {
+      timelineEvents.push({
+        type: type,
+        detail: detail,
+        time: Math.round((Date.now() - startTimestamp) / 1000),
+        timestamp: Date.now()
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // WARNING BANNER (mild violations / info)
+    // ═══════════════════════════════════════════════════════════════
+    function showWarning(msg) {
+      document.getElementById('warn-text').textContent = msg;
+      document.getElementById('warn-banner').classList.remove('hidden');
+      // Auto-dismiss after 8 seconds
+      setTimeout(function () {
+        document.getElementById('warn-banner').classList.add('hidden');
+      }, 8000);
+    }
+
+    function dismissWarning() {
+      document.getElementById('warn-banner').classList.add('hidden');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // VIOLATION OVERLAY (severe violations — pauses exam)
+    // ═══════════════════════════════════════════════════════════════
+    function showViolationOverlay(type, detail) {
+      if (overlayVisible || isSubmitted) return;
+      overlayVisible = true;
+      overlayAcked = false;
+      timerPaused = true;
+
+      // Reset acknowledgment UI
+      document.getElementById('vio-ack-check').classList.remove('checked');
+      document.getElementById('vio-continue-btn').classList.remove('enabled');
+
+      // Look up violation type config
+      var vt = violationTypes[type] || violationTypes.tab_switch;
+
+      // Populate overlay
+      document.getElementById('vio-title').textContent = vt.title;
+      document.getElementById('vio-sub').textContent = vt.sub.replace('{n}', violationCount);
+      document.getElementById('vio-inc-type').textContent = vt.label;
+
+      // Current time + question
+      var now = new Date();
+      var timeStr = (now.getHours() < 10 ? '0' : '') + now.getHours() + ':' +
+                    (now.getMinutes() < 10 ? '0' : '') + now.getMinutes() + ':' +
+                    (now.getSeconds() < 10 ? '0' : '') + now.getSeconds();
+      document.getElementById('vio-inc-time').textContent = timeStr + ' · Q' + (currentIdx + 1);
+
+      document.getElementById('vio-warn-text').textContent = vt.text;
+      document.getElementById('vio-cq1').textContent = vt.cq1;
+      document.getElementById('vio-cq2').textContent = vt.cq2.replace('{max}', MAX_VIOLATIONS);
+
+      // Violation count bar
+      document.getElementById('vio-v-count').textContent = violationCount;
+      document.getElementById('vio-v-max').textContent = ' / ' + MAX_VIOLATIONS;
+      document.getElementById('vio-bar').style.width = Math.min(violationCount / MAX_VIOLATIONS * 100, 100) + '%';
+
+      // Re-trigger entrance animation
+      var modal = document.getElementById('vio-modal');
+      modal.classList.remove('entered');
+      void modal.offsetWidth; // force reflow
+      modal.classList.add('entered');
+
+      // Show overlay
+      document.getElementById('violation-overlay').classList.remove('hidden');
+    }
+
+    function toggleOverlayAck() {
+      overlayAcked = !overlayAcked;
+      document.getElementById('vio-ack-check').classList.toggle('checked', overlayAcked);
+      document.getElementById('vio-continue-btn').classList.toggle('enabled', overlayAcked);
+    }
+
+    function continueFromOverlay() {
+      if (!overlayAcked) return;
+      overlayVisible = false;
+      timerPaused = false;
+      document.getElementById('violation-overlay').classList.add('hidden');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // RISK SCORE
+    // ═══════════════════════════════════════════════════════════════
+    function updateRisk() {
+      var fill = document.getElementById('risk-fill');
+      var label = document.getElementById('risk-label');
+      fill.style.width = riskPct + '%';
+      if (riskPct < 30) {
+        fill.className = 'risk-fill';
+        label.textContent = 'Low — ' + riskPct + '%';
+        label.style.color = '#5DCAA5';
+      } else if (riskPct < 65) {
+        fill.className = 'risk-fill medium';
+        label.textContent = 'Medium — ' + riskPct + '%';
+        label.style.color = '#FAC775';
+      } else {
+        fill.className = 'risk-fill high';
+        label.textContent = 'High — ' + riskPct + '%';
+        label.style.color = '#FC8585';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SIGNAL UI UPDATER
+    // ═══════════════════════════════════════════════════════════════
+    function updateSignal(name, level, text) {
+      // name: 'face', 'gaze', 'tab', 'audio'
+      // level: 'ok', 'warn', 'danger'
+      var iconEl = document.getElementById('sig-' + name + '-icon');
+      var valEl = document.getElementById('sig-' + name + '-val');
+      if (iconEl) {
+        iconEl.className = 'sig-icon sig-' + level;
+      }
+      if (valEl) {
+        valEl.textContent = text;
+        valEl.className = 'sig-val val-' + level;
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SUBMIT MODAL
+    // ═══════════════════════════════════════════════════════════════
+    function showSubmitModal() {
+      var answeredCount = Object.keys(answers).length;
+      var unanswered = totalQ - answeredCount;
+      var flaggedCount = Object.keys(flagged).length;
+
+      var body = '<strong>' + answeredCount + '</strong> of ' + totalQ + ' questions answered.';
+      if (unanswered > 0) body += '<br><strong style="color:#FC8585">' + unanswered + '</strong> question' + (unanswered > 1 ? 's' : '') + ' unanswered.';
+      if (flaggedCount > 0) body += '<br><strong style="color:#FAC775">' + flaggedCount + '</strong> question' + (flaggedCount > 1 ? 's' : '') + ' flagged for review.';
+      body += '<br><br>Once submitted, you <strong>cannot</strong> change your answers.';
+
+      document.getElementById('submit-modal-body').innerHTML = body;
+      document.getElementById('submit-modal').classList.remove('hidden');
+    }
+
+    function hideSubmitModal() {
+      document.getElementById('submit-modal').classList.add('hidden');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // EXAM SUBMISSION
+    // ═══════════════════════════════════════════════════════════════
+    function submitExam(isAuto) {
+      if (isSubmitting || isSubmitted) return;
+      isSubmitting = true;
+      isSubmitted = true;
+
+      hideSubmitModal();
+      clearInterval(timerInterval);
+      clearInterval(faceDetectTimer);
+      clearInterval(audioCheckTimer);
+      clearInterval(healthCheckTimer);
+      clearInterval(autoSaveTimer);
+
+      // Calculate time spent
+      var timeSpent = Math.round((Date.now() - startTimestamp) / 1000);
+
+      // Disable all buttons
+      var buttons = document.querySelectorAll('.btn-er');
+      for (var i = 0; i < buttons.length; i++) {
+        buttons[i].disabled = true;
+        buttons[i].style.opacity = '0.3';
+      }
+
+      // Show submitting state in timer
+      document.getElementById('timer').textContent = isAuto ? 'AUTO' : 'DONE';
+
+      // Prepare payload
+      var payload = {
+        sessionId: sessionId,
+        studentName: studentName,
+        studentRoll: studentRoll,
+        answers: answers,
+        violations: violationCount,
+        riskScore: riskPct
+      };
+
+      // Submit with retry (exponential backoff)
+      submitWithRetry(payload, timeSpent, 0);
+    }
+
+    function submitWithRetry(payload, timeSpent, attempt) {
+      fetch(BASE + '/api/student/exam/' + encodeURIComponent(examCode) + '/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (r) { return r.json(); })
+        .then(function (result) {
+          // Store results for post-exam-report.html
+          storeResultsForReport(result, timeSpent);
+          finishSubmission(payload);
+        })
+        .catch(function (err) {
+          console.error('[ExamRoom] Submit attempt ' + (attempt + 1) + ' failed:', err);
+          if (attempt < SUBMIT_RETRY_COUNT - 1) {
+            // Exponential backoff retry
+            var delay = SUBMIT_RETRY_DELAY_MS * Math.pow(2, attempt);
+            document.getElementById('timer').textContent = 'RETRY';
+            setTimeout(function () {
+              submitWithRetry(payload, timeSpent, attempt + 1);
+            }, delay);
+          } else {
+            // All retries failed — save locally and proceed
+            console.error('[ExamRoom] All submit retries failed. Saving answers locally.');
+            // Save encrypted answers for potential recovery
+            CryptoStore.saveAnswers(answers).catch(function () {});
+            storeResultsForReport({
+              ok: false, score: 0, totalMarks: examData.totalMarks || 0,
+              correctCount: 0, wrongCount: 0, answeredCount: Object.keys(answers).length
+            }, timeSpent);
+            finishSubmission(payload);
+          }
+        });
+    }
+
+    function finishSubmission(payload) {
+      // Lift lockdown via Electron
+      if (window.electronAPI && window.electronAPI.submitExam) {
+        window.electronAPI.submitExam({ reason: 'VERIFIED_SUBMIT' });
+      }
+      if (window.electronAPI && window.electronAPI.submitFullExam) {
+        window.electronAPI.submitFullExam(payload);
+      }
+
+      // Stop media
+      stopMedia();
+
+      // Navigate to report
+      setTimeout(function () {
+        window.location.href = 'post-exam-report.html';
+      }, 800);
+    }
+
+    function storeResultsForReport(result, timeSpent) {
+      localStorage.setItem('final_student_name', studentName);
+      localStorage.setItem('final_student_roll', studentRoll);
+      localStorage.setItem('final_exam_title', examData.title || 'Exam');
+      localStorage.setItem('final_exam_subject', examData.subject || '');
+      localStorage.setItem('final_exam_duration', String(examData.duration || 0));
+      localStorage.setItem('final_score', String(result.score || 0));
+      localStorage.setItem('final_total', String(result.totalMarks || examData.totalMarks || 0));
+      localStorage.setItem('final_violations', String(violationCount));
+      localStorage.setItem('final_risk', String(riskPct));
+      localStorage.setItem('final_answered', String(result.answeredCount || Object.keys(answers).length));
+      localStorage.setItem('final_correct', String(result.correctCount || 0));
+      localStorage.setItem('final_wrong', String(result.wrongCount || 0));
+      localStorage.setItem('final_time', String(timeSpent));
+      localStorage.setItem('final_timeline', JSON.stringify(timelineEvents));
+      localStorage.setItem('current_role', 'student');
+    }
+
+    function stopMedia() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(function (t) { t.stop(); });
+        videoStream = null;
+      }
+      if (audioContext) {
+        try { audioContext.close(); } catch (e) { }
+        audioContext = null;
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ERROR SCREEN
+    // ═══════════════════════════════════════════════════════════════
+    function showError(title, msg) {
+      document.getElementById('exam-ui').style.display = 'none';
+      document.getElementById('error-screen').style.display = 'flex';
+      document.getElementById('err-title').textContent = '⚠ ' + title;
+      document.getElementById('err-msg').textContent = msg;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // UTILITY
+    // ═══════════════════════════════════════════════════════════════
+    function escHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Keyboard shortcuts for navigation
+    document.addEventListener('keydown', function (e) {
+      if (isSubmitted || overlayVisible) return;
+      // Arrow keys for navigation
+      if (e.key === 'ArrowRight') { nextQ(); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft') { prevQ(); e.preventDefault(); }
+      // A/B/C/D for quick option selection
+      else if (e.key === 'a' || e.key === 'A') selectOption(0);
+      else if (e.key === 'b' || e.key === 'B') selectOption(1);
+      else if (e.key === 'c' || e.key === 'C') selectOption(2);
+      else if (e.key === 'd' || e.key === 'D') selectOption(3);
+    });
+
+    // Prevent right-click context menu
+    document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+    // ═══════════════════════════════════════════════════════════════
+    // SERVER HEALTH CHECK & RECONNECTION
+    // ═══════════════════════════════════════════════════════════════
+    function checkServerHealth() {
+      if (isSubmitted) return;
+      fetch(BASE + '/api/health', { method: 'GET' })
+        .then(function (r) {
+          if (r.ok && !serverOnline) {
+            // Server came back online
+            serverOnline = true;
+            dismissConnectionBanner();
+            addTimelineEvent('reconnect', 'Backend connection restored.');
+            // Flush buffered answers
+            autoSaveAnswers();
+          } else if (r.ok) {
+            serverOnline = true;
+          }
+        })
+        .catch(function () {
+          if (serverOnline) {
+            serverOnline = false;
+            showConnectionBanner();
+            addTimelineEvent('disconnect', 'Backend connection lost. Answers being saved locally.');
+          }
+        });
+    }
+
+    function showConnectionBanner() {
+      var existing = document.getElementById('conn-banner');
+      if (existing) { existing.style.display = 'flex'; return; }
+      var banner = document.createElement('div');
+      banner.id = 'conn-banner';
+      banner.style.cssText = 'position:fixed;top:52px;left:0;right:0;z-index:9999;background:#2B1A10;border-bottom:1px solid #854F0B;padding:8px 16px;display:flex;align-items:center;gap:8px;font-size:12px;color:#FAC775;';
+      banner.innerHTML = '<span style="animation:pulse 1.5s infinite">⚠</span> Connection lost — answers are being saved locally. They will sync when the connection is restored.';
+      document.body.appendChild(banner);
+    }
+
+    function dismissConnectionBanner() {
+      var banner = document.getElementById('conn-banner');
+      if (banner) banner.style.display = 'none';
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // AUTO-SAVE ANSWERS
+    // ═══════════════════════════════════════════════════════════════
+    function autoSaveAnswers() {
+      if (isSubmitted || Object.keys(answers).length === 0) return;
+      CryptoStore.saveAnswers(answers).catch(function () {
+        // Fallback: plain save
+        try { localStorage.setItem('backup_answers', JSON.stringify(answers)); } catch (e) {}
+      });
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProctorAI — Proctor Dashboard</title>
+  <link rel="stylesheet" href="shared.css" />
+  <!-- Socket.IO client: served automatically by the backend on port 4000 -->
+  <script src="http://localhost:4000/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Stat row ───────────────────────────── */
+    .stat-row {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 18px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .stat-tile {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 110px;
+    }
+
+    .stat-num {
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .stat-lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Body layout ─────────────────────────── */
+    .pd-body {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Candidate grid panel ────────────────── */
+    .grid-panel {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+    }
+
+    .grid-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tb-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .tb-btn:hover,
+    .tb-btn.active {
+      background: var(--bg-raised);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .cand-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .cand {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .cand:hover {
+      border-color: var(--border-strong);
+    }
+
+    .cand.flagged {
+      border-color: rgba(239, 159, 39, 0.45);
+    }
+
+    .cand.critical {
+      border-color: rgba(226, 75, 74, 0.5);
+    }
+
+    .cand.selected {
+      border-color: var(--blue);
+    }
+
+    .cam-thumb {
+      aspect-ratio: 4/3;
+      background: #0A0C14;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .face-mini {
+      width: 30px;
+      height: 36px;
+      background: rgba(29, 158, 117, 0.1);
+      border-radius: 50% 50% 40% 40%;
+      border: 1px solid rgba(29, 158, 117, 0.25);
+      margin-top: 12px;
+    }
+
+    .cam-id-badge {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      background: rgba(10, 12, 20, 0.75);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    .risk-chip {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 9px;
+      font-weight: 500;
+      border: 1px solid;
+    }
+
+    .rc-low {
+      background: #091510;
+      color: #5DCAA5;
+      border-color: #1A5230;
+    }
+
+    .rc-medium {
+      background: #1C1208;
+      color: #FAC775;
+      border-color: #6B3D08;
+    }
+
+    .rc-high {
+      background: #1A0B0B;
+      color: #FC8585;
+      border-color: #7A2020;
+    }
+
+    .no-face-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(226, 75, 74, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cand-foot {
+      padding: 7px 9px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cand-name {
+      font-size: 11px;
+      font-weight: 500;
+      color: #B0B2BE;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 80px;
+    }
+
+    .flag-dots {
+      display: flex;
+      gap: 3px;
+    }
+
+    .fd {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+
+    /* ── Side panel ─────────────────────────── */
+    .side-panel {
+      background: var(--bg-surface);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .detail-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .detail-cam {
+      aspect-ratio: 4/3;
+      background: #0A0B12;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .detail-face {
+      width: 60px;
+      height: 72px;
+      background: rgba(29, 158, 117, 0.12);
+      border-radius: 50% 50% 40% 40%;
+      border: 1.5px solid rgba(29, 158, 117, 0.4);
+    }
+
+    .face-corners {
+      position: absolute;
+      inset: 8px;
+      border: 1.5px solid rgba(29, 158, 117, 0.35);
+      border-radius: 4px;
+    }
+
+    .detail-head {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .detail-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .detail-id {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .detail-body {
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .dr-lbl {
+      color: var(--text-muted);
+    }
+
+    .risk-meter {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+    }
+
+    .rm-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .rm-track {
+      height: 6px;
+      background: var(--bg-raised);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 5px;
+    }
+
+    .rm-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s, background 0.4s;
+    }
+
+    .rm-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--text-hint);
+    }
+
+    .flag-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .flag-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 7px 10px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .fi-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+
+    .fi-text {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .fi-time {
+      font-size: 10px;
+      color: var(--text-hint);
+      margin-top: 2px;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .act-btn {
+      flex: 1;
+      border-radius: var(--radius-md);
+      padding: 8px;
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+      background: transparent;
+      border: 1px solid var(--border-md);
+      color: var(--text-secondary);
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .act-btn:hover {
+      background: var(--bg-raised);
+      color: var(--text-primary);
+    }
+
+    .act-btn-red {
+      border-color: rgba(226, 75, 74, 0.3);
+      color: #FC8585;
+    }
+
+    .act-btn-red:hover {
+      background: var(--red-bg);
+    }
+
+    .act-btn-blue {
+      border-color: rgba(55, 138, 221, 0.3);
+      color: #7BB8E8;
+    }
+
+    .act-btn-blue:hover {
+      background: var(--blue-bg);
+    }
+
+    /* ── Footer ─────────────────────────────── */
+    .pd-footer {
+      background: #0F1117;
+      border-top: 1px solid var(--border);
+      padding: 0 18px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .footer-stat {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <path d="M11 2L4 5v6c0 4.4 3 8.2 7 9 4-.8 7-4.6 7-9V5L11 2Z" stroke="#378ADD" stroke-width="1.2"
+        fill="rgba(55,138,221,0.1)" />
+      <path d="M8 11l2 2 4-4" stroke="#378ADD" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+    <span class="topbar-title">ProctorAI — Live Monitoring</span>
+    <span class="topbar-meta">Computer Science Paper I &nbsp;·&nbsp; Hall A</span>
+    <div class="spacer"></div>
+    <div class="pill pill-red">
+      <div class="dot dot-red dot-sm pulse"></div>Live session
+    </div>
+    <div class="pill pill-amber">
+      <div class="dot dot-amber dot-sm"></div><span id="flag-pill">3 flagged</span>
+    </div>
+    <div class="pill pill-blue" id="topbar-timer">44:18 remaining</div>
+  </div>
+
+  <!-- Stat row -->
+  <div class="stat-row">
+    <div class="stat-tile">
+      <div>
+        <div class="stat-num" style="color:var(--text-primary)" id="s-total">16</div>
+        <div class="stat-lbl">Candidates</div>
+      </div>
+    </div>
+    <div class="stat-tile">
+      <div>
+        <div class="stat-num" style="color:#5DCAA5" id="s-ok">11</div>
+        <div class="stat-lbl">All clear</div>
+      </div>
+    </div>
+    <div class="stat-tile">
+      <div>
+        <div class="stat-num" style="color:#FAC775" id="s-warn">3</div>
+        <div class="stat-lbl">Warnings</div>
+      </div>
+    </div>
+    <div class="stat-tile">
+      <div>
+        <div class="stat-num" style="color:#FC8585" id="s-crit">2</div>
+        <div class="stat-lbl">Critical</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" onclick="window.location.href='post-exam-report.html'">View reports →</button>
+  </div>
+
+  <!-- Body -->
+  <div class="pd-body">
+
+    <!-- Grid panel -->
+    <div class="grid-panel">
+      <div class="grid-toolbar">
+        <span class="sec-label" style="margin-bottom:0">Candidates</span>
+        <div class="dot dot-green dot-sm pulse" style="margin-left:4px"></div>
+        <div class="spacer"></div>
+        <button class="tb-btn active" id="f-all" onclick="setFilter('all')">All</button>
+        <button class="tb-btn" id="f-flagged" onclick="setFilter('flagged')">Flagged</button>
+        <button class="tb-btn" id="f-critical" onclick="setFilter('critical')">Critical</button>
+      </div>
+      <div class="cand-grid" id="cand-grid"></div>
+    </div>
+
+    <!-- Side panel -->
+    <div class="side-panel">
+      <div>
+        <div class="sec-label">Selected candidate</div>
+        <div class="detail-card">
+          <div class="detail-cam">
+            <div class="detail-face"></div>
+            <div class="face-corners"></div>
+            <div style="position:absolute;top:7px;left:8px" class="pill pill-red" style="font-size:9px;padding:2px 7px">
+              <div class="dot dot-red dot-sm pulse"></div>Live
+            </div>
+            <div
+              style="position:absolute;bottom:7px;right:8px;background:rgba(10,12,20,0.8);border-radius:5px;padding:2px 8px;font-size:9px;color:#5DCAA5">
+              Face OK</div>
+          </div>
+          <div class="detail-head">
+            <div>
+              <div class="detail-name" id="d-name">Waiting...</div>
+              <div class="detail-id" id="d-id">No candidates joined</div>
+            </div>
+            <div class="pill pill-amber" id="d-badge">--</div>
+          </div>
+          <div class="detail-body">
+            <div class="detail-row"><span class="dr-lbl">Face detected</span><span class="val-ok"
+                style="font-weight:500;font-size:11px">1 person</span></div>
+            <div class="detail-row"><span class="dr-lbl">Gaze</span><span class="val-ok"
+                style="font-weight:500;font-size:11px" id="d-gaze">On screen</span></div>
+            <div class="detail-row"><span class="dr-lbl">Tab switches</span><span class="val-warn"
+                style="font-weight:500;font-size:11px" id="d-tabs">2 detected</span></div>
+            <div class="detail-row"><span class="dr-lbl">Audio</span><span class="val-ok"
+                style="font-weight:500;font-size:11px">Ambient quiet</span></div>
+            <div class="detail-row"><span class="dr-lbl">Answered</span><span
+                style="font-weight:500;font-size:11px;color:var(--text-secondary)" id="d-progress">14 / 40</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-label">Risk meter</div>
+        <div class="risk-meter">
+          <div class="rm-head">
+            <span style="font-size:11px;color:var(--text-muted)">Suspicion score</span>
+            <span style="font-size:18px;font-weight:500" id="d-risk-lbl" class="val-warn">38%</span>
+          </div>
+          <div class="rm-track">
+            <div class="rm-fill" id="d-risk-bar" style="width:38%;background:#EF9F27"></div>
+          </div>
+          <div class="rm-ticks"><span>Low</span><span>Medium</span><span>High</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-label">Flag log</div>
+        <div class="flag-list" id="flag-log">
+          <!-- Live timeline flags will be injected here -->
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="act-btn act-btn-blue" style="width:100%"
+          onclick="window.location.href='post-exam-report.html'">View report →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="pd-footer">
+    <div class="footer-stat">
+      <div class="dot dot-green dot-sm"></div>WebSocket connected
+    </div>
+    <div class="footer-stat">
+      <div class="dot dot-red dot-sm pulse"></div>Recording active
+    </div>
+    <div class="footer-stat">ProctorAI v2.1</div>
+    <div class="spacer"></div>
+    <div class="footer-stat" id="live-clock">--:--:--</div>
+  </div>
+
+  <script>
+    var candidates = [];
+    var selectedIdx = 0;
+    var filter = 'all';
+    var globalTimeline = [];
+
+    async function fetchLiveRecords() {
+      try {
+        const res = await fetch('http://localhost:4000/api/exams/exam_demo_001/report');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || !data.students) return;
+
+        candidates = data.students.map(s => {
+          const risk = s.riskTotal || 0;
+          let status = 'ok';
+          if (risk >= 60) status = 'critical';
+          else if (risk >= 30) status = 'flagged';
+          return {
+            id: s.studentId,
+            name: s.studentId, // ID used for name temporarily
+            risk: risk,
+            status: status,
+            flags: s.suspiciousCount || 0,
+            tabs: 0,
+            q: 1
+          };
+        });
+
+        if (data.timeline) {
+          globalTimeline = data.timeline;
+        }
+
+        updateStats();
+        buildGrid();
+        if (candidates.length > 0) {
+          selectCandidate(candidates[0]);
+        } else {
+          document.getElementById('d-name').textContent = 'Waiting for students...';
+          document.getElementById('d-id').textContent = '---';
+          document.getElementById('flag-log').innerHTML = '';
+        }
+      } catch (err) {
+        console.warn('Failed to fetch initial report', err);
+      }
+    }
+
+    function renderFlagLog(studentId) {
+      const fl = document.getElementById('flag-log');
+      fl.innerHTML = '';
+      if (!studentId) return;
+
+      const filtered = globalTimeline.filter(t => t.studentId === studentId);
+
+      // reverse so newest is at top
+      filtered.slice().reverse().forEach(t => {
+        let dotColor = '#5DCAA5';
+        if (t.severity === 'critical') dotColor = '#E24B4A';
+        else if (t.severity === 'high' || t.severity === 'medium') dotColor = '#EF9F27';
+
+        const item = document.createElement('div');
+        item.className = 'flag-item';
+        const timeStr = new Date(t.timestampMs || Date.now()).toLocaleTimeString();
+        const typeStr = (t.type || '').replace(/_/g, ' ');
+
+        item.innerHTML = '<div class="fi-dot" style="background:' + dotColor + '"></div>' +
+          '<div><div class="fi-text">' + typeStr + '</div>' + // removed studentId from text as it is specific now
+          '<div class="fi-time">' + timeStr + '</div></div>';
+        fl.appendChild(item);
+      });
+    }
+
+    fetchLiveRecords();
+
+    function riskChipClass(r) { return r >= 60 ? 'rc-high' : r >= 30 ? 'rc-medium' : 'rc-low'; }
+
+    function buildGrid() {
+      var g = document.getElementById('cand-grid'); g.innerHTML = '';
+      var list = candidates.filter(function (c) {
+        if (filter === 'flagged') return c.status === 'flagged' || c.status === 'critical';
+        if (filter === 'critical') return c.status === 'critical';
+        return true;
+      });
+      list.forEach(function (c, i) {
+        var realIdx = candidates.indexOf(c);
+        var d = document.createElement('div');
+        var cls = 'cand ' + c.status + (realIdx === selectedIdx ? ' selected' : '');
+        d.className = cls;
+
+        var noFaceHtml = (c.status === 'critical' && c.flags > 4)
+          ? '<div class="no-face-overlay"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M8 3a5 5 0 015 5" stroke="#E24B4A" stroke-width="1.2" stroke-linecap="round"/></svg></div>' : '';
+        var flagDots = '';
+        for (var f = 0; f < Math.min(c.flags, 5); f++) {
+          flagDots += '<div class="fd" style="background:' + (c.status === 'critical' ? '#E24B4A' : '#EF9F27') + '"></div>';
+        }
+        d.innerHTML = '<div class="cam-thumb"><div class="face-mini"></div>' + noFaceHtml + '<div class="cam-id-badge">' + c.id + '</div><div class="risk-chip ' + riskChipClass(c.risk) + '">' + c.risk + '%</div></div><div class="cand-foot"><span class="cand-name">' + c.name + '</span><div class="flag-dots">' + flagDots + '</div></div>';
+        (function (ri) { d.onclick = function () { selectedIdx = ri; buildGrid(); selectCandidate(candidates[ri]); }; })(realIdx);
+        g.appendChild(d);
+      });
+    }
+
+    function selectCandidate(c) {
+      document.getElementById('d-name').textContent = c.name;
+      document.getElementById('d-id').textContent = c.id + ' · Q' + c.q + ' / 40';
+      document.getElementById('d-tabs').textContent = c.tabs > 0 ? c.tabs + ' detected' : 'None';
+      document.getElementById('d-tabs').className = c.tabs > 0 ? 'val-warn' : 'val-ok';
+      document.getElementById('d-progress').textContent = c.q + ' / 40';
+      var r = c.risk;
+      var rb = document.getElementById('d-risk-bar');
+      var rl = document.getElementById('d-risk-lbl');
+      rb.style.width = r + '%';
+      if (r >= 60) { rb.style.background = '#E24B4A'; rl.className = 'val-danger'; }
+      else if (r >= 30) { rb.style.background = '#EF9F27'; rl.className = 'val-warn'; }
+      else { rb.style.background = '#1D9E75'; rl.className = 'val-ok'; }
+      rl.textContent = r + '%';
+      var db = document.getElementById('d-badge');
+      if (r >= 60) { db.className = 'pill pill-red'; db.textContent = 'High risk'; }
+      else if (r >= 30) { db.className = 'pill pill-amber'; db.textContent = 'Medium risk'; }
+      else { db.className = 'pill pill-green'; db.textContent = 'Low risk'; }
+
+      renderFlagLog(c.id);
+    }
+
+    function setFilter(f) {
+      filter = f;
+      ['all', 'flagged', 'critical'].forEach(function (x) { document.getElementById('f-' + x).classList.remove('active'); });
+      document.getElementById('f-' + f).classList.add('active');
+      buildGrid();
+    }
+
+    function addFlag() {
+      var c = candidates[selectedIdx];
+      c.flags++; c.risk = Math.min(c.risk + 15, 95);
+      c.status = c.risk >= 60 ? 'critical' : 'flagged';
+      updateStats(); buildGrid(); selectCandidate(c);
+      var fl = document.getElementById('flag-log');
+      var item = document.createElement('div');
+      item.className = 'flag-item';
+      item.innerHTML = '<div class="fi-dot" style="background:#E24B4A"></div><div><div class="fi-text">Manual flag by proctor</div><div class="fi-time">Just now</div></div>';
+      fl.prepend(item);
+    }
+
+    function updateStats() {
+      var ok = candidates.filter(function (c) { return c.status === 'ok'; }).length;
+      var warn = candidates.filter(function (c) { return c.status === 'flagged'; }).length;
+      var crit = candidates.filter(function (c) { return c.status === 'critical'; }).length;
+      document.getElementById('s-ok').textContent = ok;
+      document.getElementById('s-warn').textContent = warn;
+      document.getElementById('s-crit').textContent = crit;
+      document.getElementById('flag-pill').textContent = (warn + crit) + ' flagged';
+    }
+
+    function tickClock() {
+      var n = new Date();
+      var p = function (x) { return (x < 10 ? '0' : '') + x; };
+      document.getElementById('live-clock').textContent = p(n.getHours()) + ':' + p(n.getMinutes()) + ':' + p(n.getSeconds());
+    }
+
+    buildGrid();
+    setInterval(tickClock, 1000);
+    tickClock();
+
+    /* ── Live Socket.IO connection to backend ────────────────── */
+    (function connectLiveBackend() {
+      if (typeof io === 'undefined') {
+        console.warn('[Dashboard] Socket.IO not available — backend may not be running.');
+        return;
+      }
+
+      var EXAM_ID = 'exam_demo_001'; // Must match main.js EXAM_ID
+      var BACKEND_URL = 'http://localhost:4000';
+
+      var liveSocket = io(BACKEND_URL, {
+        transports: ['websocket'],
+        reconnection: true,
+        reconnectionDelay: 3000,
+      });
+
+      liveSocket.on('connect', function () {
+        console.log('[Dashboard] Connected to backend');
+        // Join as a proctor to receive all events for this exam
+        liveSocket.emit('exam:join', { examId: EXAM_ID });
+        // Update footer connection indicator
+        var connDot = document.getElementById('conn-dot');
+        if (connDot) { connDot.style.background = '#1D9E75'; }
+        var connText = document.getElementById('conn-text');
+        if (connText) { connText.textContent = 'Backend connected'; }
+      });
+
+      liveSocket.on('disconnect', function () {
+        console.warn('[Dashboard] Disconnected from backend');
+        var connDot = document.getElementById('conn-dot');
+        if (connDot) { connDot.style.background = '#E24B4A'; }
+        var connText = document.getElementById('conn-text');
+        if (connText) { connText.textContent = 'Backend disconnected'; }
+      });
+
+      // Real-time violation event from a student
+      liveSocket.on('proctor:event', function (data) {
+        if (!data || !data.event) return;
+        var evt = data.event;
+        var studentId = evt.studentId || 'unknown';
+        var type = evt.type || 'unknown_violation';
+        var severity = evt.severity || 'medium';
+        var riskTotal = (data.student && data.student.riskTotal) || 0;
+
+        // Update candidate card risk if found
+        var matched = candidates.find(function (c) {
+          return c.id === studentId;
+        });
+        if (!matched && candidates.length > 0) {
+          // Fall back: use first unmatched candidate for demo
+          matched = candidates[0];
+        }
+        if (matched) {
+          matched.risk = Math.max(matched.risk, riskTotal);
+          if (severity === 'critical') { matched.status = 'critical'; matched.flags++; }
+          else if (severity === 'high' && matched.status !== 'critical') { matched.status = 'flagged'; matched.flags++; }
+          buildGrid();
+          updateStats();
+        }
+
+        // Add to global timeline array
+        globalTimeline.push({
+          studentId: studentId,
+          type: type,
+          severity: severity,
+          timestampMs: Date.now()
+        });
+
+        // Update log dynamically if looking at this student
+        if (candidates[selectedIdx] && candidates[selectedIdx].id === studentId) {
+          renderFlagLog(studentId);
+        }
+      });
+
+      // Student submission notification
+      liveSocket.on('proctor:submission', function (data) {
+        if (!data) return;
+        var studentId = data.studentId || 'unknown';
+        var fl = document.getElementById('flag-log');
+        if (fl) {
+          var item = document.createElement('div');
+          item.className = 'flag-item';
+          var sub = data.submission || {};
+          item.innerHTML = '<div class="fi-dot" style="background:#5DCAA5"></div>' +
+            '<div><div class="fi-text">✅ Exam submitted — ' + studentId + '</div>' +
+            '<div class="fi-time">Score: ' + (sub.quizScore || 0) + '/' + (sub.quizTotal || 0) +
+            ' · risk: ' + (sub.integrityRiskTotal || 0) + '%</div></div>';
+          fl.prepend(item);
+        }
+      });
+    })();
+
+  </script>
+</body>
+
+</html>

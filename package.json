@@ -1,0 +1,22 @@
+{
+  "name": "ai-proctor-browser",
+  "version": "1.0.0",
+  "description": "AI-powered secure exam browser with real-time proctoring",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron main.js",
+    "start:backend": "cd backend && node index.js",
+    "install:backend": "cd backend && npm install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^41.1.1"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}

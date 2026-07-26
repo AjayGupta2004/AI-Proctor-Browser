@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>ProctorAI — Create Exam</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh
+    }
+
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden
+    }
+
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: #0D0F16;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 14px 0
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px
+    }
+
+    .sidebar-logo-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #0F1D2E;
+      border: 1px solid rgba(55, 138, 221, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
+    }
+
+    .sidebar-logo-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary)
+    }
+
+    .sidebar-logo-sub {
+      font-size: 10px;
+      color: var(--text-muted)
+    }
+
+    .nav-section {
+      padding: 6px 12px 2px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-hint)
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      margin: 1px 8px;
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+      border: none;
+      background: transparent;
+      width: calc(100% - 16px);
+      text-align: left
+    }
+
+    .nav-item:hover {
+      background: var(--bg-raised);
+      color: var(--text-secondary)
+    }
+
+    .nav-item.active {
+      background: var(--blue-bg);
+      color: #7BB8E8;
+      border: 1px solid rgba(55, 138, 221, .2)
+    }
+
+    .nav-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border)
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #185FA5, #0F3520);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #E2E4EC;
+      flex-shrink: 0
+    }
+
+    .user-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .user-role {
+      font-size: 10px;
+      color: var(--text-muted)
+    }
+
+    .logout-btn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      background: transparent;
+      border: 1px solid var(--border-md);
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit
+    }
+
+    .logout-btn:hover {
+      background: var(--red-bg);
+      border-color: var(--red-border);
+      color: #FC8585
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto
+    }
+
+    .page-header {
+      padding: 20px 24px 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface)
+    }
+
+    .page-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary)
+    }
+
+    .page-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px
+    }
+
+    .content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 900px
+    }
+
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden
+    }
+
+    .form-card-head {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .form-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary)
+    }
+
+    .form-card-body {
+      padding: 18px
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    .form-grid.full {
+      grid-template-columns: 1fr
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .form-group.span2 {
+      grid-column: 1/-1
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary)
+    }
+
+    .req {
+      color: var(--red);
+      margin-left: 2px
+    }
+
+    input[type=text],
+    input[type=number],
+    textarea,
+    select {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s;
+      box-sizing: border-box
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: rgba(55, 138, 221, .6)
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      transition: border-color .15s
+    }
+
+    .check-row:hover {
+      border-color: var(--border-md)
+    }
+
+    .check-row input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--blue);
+      cursor: pointer;
+      flex-shrink: 0
+    }
+
+    .check-row span {
+      font-size: 12px;
+      color: var(--text-secondary)
+    }
+
+    .checks-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap
+    }
+
+    /* Questions */
+    .q-card {
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 12px
+    }
+
+    .q-card-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px
+    }
+
+    .q-num-badge {
+      background: var(--blue-bg);
+      border: 1px solid rgba(55, 138, 221, .3);
+      color: #7BB8E8;
+      padding: 2px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 700
+    }
+
+    .q-card select {
+      width: auto
+    }
+
+    .opts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px
+    }
+
+    .opt-row {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .opt-radio {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--green);
+      cursor: pointer;
+      flex-shrink: 0
+    }
+
+    .opt-input {
+      flex: 1
+    }
+
+    .remove-q-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 8px;
+      font-family: inherit
+    }
+
+    .remove-q-btn:hover {
+      text-decoration: underline
+    }
+
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 4px
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-lg);
+      padding: 12px 18px;
+      font-size: 13px;
+      color: var(--text-primary);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+      max-width: 320px
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    #toast.toast-err {
+      border-color: var(--red-border);
+      color: #FC8585
+    }
+
+    #toast.toast-ok {
+      border-color: var(--green-border);
+      color: #5DCAA5
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+      <path d="M11 2L4 5v6c0 4.4 3 8.2 7 9 4-.8 7-4.6 7-9V5L11 2Z" stroke="#378ADD" stroke-width="1.2"
+        fill="rgba(55,138,221,0.1)" />
+    </svg>
+    <span class="topbar-title">ProctorAI — Create Exam</span>
+    <div class="spacer"></div>
+    <div class="pill pill-blue">
+      <div class="dot dot-blue dot-sm"></div><span id="topbar-user">Teacher</span>
+    </div>
+  </div>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+            <path d="M11 2L4 5v6c0 4.4 3 8.2 7 9 4-.8 7-4.6 7-9V5L11 2Z" stroke="#378ADD" stroke-width="1.2"
+              fill="rgba(55,138,221,0.1)" />
+          </svg></div>
+        <div>
+          <div class="sidebar-logo-text">ProctorAI</div>
+          <div class="sidebar-logo-sub">Teacher Console</div>
+        </div>
+      </div>
+      <div class="nav-section">Main</div>
+      <a href="teacher-dashboard.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+        </svg>Dashboard</a>
+      <a href="exam-management.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2" />
+          <path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Exam Management</a>
+      <a href="create-exam.html" class="nav-item active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="#378ADD" stroke-width="1.2" />
+          <path d="M8 5v6M5 8h6" stroke="#378ADD" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Create Exam</a>
+      <div class="nav-section" style="margin-top:8px">Monitoring</div>
+      <a href="live-monitoring.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2" />
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 2" />
+        </svg>Live Monitoring</a>
+      <a href="exam-results.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <path d="M2 12V8M6 12V5M10 12V7M14 12V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Results & Reports</a>
+      <a href="student-records.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2" />
+          <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Student Records</a>
+      <div class="sidebar-bottom">
+        <div class="user-chip">
+          <div class="user-avatar" id="user-avatar">T</div>
+          <div>
+            <div class="user-name" id="user-name">Teacher</div>
+            <div class="user-role">Teacher</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Sign out</button>
+      </div>
+    </nav>
+
+    <main class="main">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <div class="page-title">Create Exam</div>
+            <div class="page-sub">Build a new exam with questions and settings.</div>
+          </div>
+          <button class="btn" onclick="window.location.href='exam-management.html'">← Back</button>
+        </div>
+      </div>
+      <div class="content">
+
+        <!-- Exam Details -->
+        <div class="form-card">
+          <div class="form-card-head"><span class="form-card-title">Exam Details</span></div>
+          <div class="form-card-body">
+            <div class="form-grid">
+              <div class="form-group"><label>Title<span class="req">*</span></label><input type="text" id="f-title"
+                  placeholder="e.g. Midterm Mathematics" /></div>
+              <div class="form-group"><label>Subject</label><input type="text" id="f-subject"
+                  placeholder="e.g. Mathematics" /></div>
+              <div class="form-group span2"><label>Description</label><textarea id="f-desc"
+                  placeholder="Brief description of this exam (optional)"></textarea></div>
+              <div class="form-group"><label>Duration (minutes)<span class="req">*</span></label><input type="number"
+                  id="f-duration" value="60" min="5" max="300" /></div>
+              <div class="form-group">
+                <label>Total Marks <span
+                    style="font-size:10px;color:var(--text-muted);font-weight:400">(auto-calculated)</span></label>
+                <input type="number" id="f-total-marks" value="1" readonly
+                  style="background:var(--bg-raised);color:var(--text-muted);cursor:not-allowed"
+                  title="Automatically calculated from question marks" />
+              </div>
+              <div class="form-group"><label>Passing Marks<span class="req">*</span></label><input type="number"
+                  id="f-passing-marks" value="1" min="1" /></div>
+              <div class="form-group span2">
+                <label>Exam Code<span class="req">*</span></label>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input type="text" id="f-exam-code" placeholder="e.g. MATH01"
+                    style="text-transform:uppercase;letter-spacing:.1em;font-weight:600;max-width:200px"
+                    oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" />
+                  <button type="button" class="btn" style="font-size:12px;white-space:nowrap" onclick="genCode()">↺
+                    Generate</button>
+                  <span style="font-size:11px;color:var(--text-muted)">Students enter this code to access the
+                    exam</span>
+                </div>
+              </div>
+            </div>
+            <div class="checks-row" style="margin-top:14px">
+              <label class="check-row"><input type="checkbox" id="f-backtrack" checked /><span>Allow
+                  backtracking</span></label>
+              <label class="check-row"><input type="checkbox" id="f-shuffle" /><span>Shuffle questions</span></label>
+              <label class="check-row"><input type="checkbox" id="f-show-results" /><span>Show results after
+                  submission</span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Questions -->
+        <div class="form-card">
+          <div class="form-card-head">
+            <span class="form-card-title">Questions (<span id="q-count">1</span>)</span>
+            <button class="btn btn-primary" style="font-size:12px" onclick="addQuestion()">+ Add Question</button>
+          </div>
+          <div class="form-card-body" id="questions-container"></div>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-bar">
+          <button class="btn" onclick="window.location.href='exam-management.html'">Cancel</button>
+          <button class="btn btn-success" id="save-btn" onclick="saveExam()">✓ Create Exam</button>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <div id="toast"></div>
+  <script>
+    var token = localStorage.getItem('teacher_token');
+    var user = null;
+    try { user = JSON.parse(localStorage.getItem('teacher_user') || 'null'); } catch (_) { }
+    if (!token || !user) { window.location.href = 'login.html'; }
+    document.getElementById('topbar-user').textContent = user ? user.fullName : 'Teacher';
+    document.getElementById('user-name').textContent = user ? user.fullName : 'Teacher';
+    document.getElementById('user-avatar').textContent = user ? user.fullName.charAt(0).toUpperCase() : 'T';
+    var BASE = 'http://localhost:4000';
+    var questions = [];
+
+    function genCode() {
+      var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      var code = ''; for (var i = 0; i < 6; i++)code += chars[Math.floor(Math.random() * chars.length)];
+      document.getElementById('f-exam-code').value = code;
+    }
+
+    // Auto-generate a code on page load
+    window.addEventListener('load', function () { genCode(); });
+
+
+    function api(path, opts) {
+      return fetch(BASE + path, Object.assign({ headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } }, opts || {})).then(function (r) { return r.json(); });
+    }
+    var toastTimer = null;
+    function showToast(msg, type) {
+      var t = document.getElementById('toast'); t.textContent = msg;
+      t.className = 'show ' + (type === 'error' ? 'toast-err' : 'toast-ok');
+      clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.className = ''; }, 3500);
+    }
+    function escHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    function addQuestion(data) {
+      var q = data || { type: 'multiple-choice', text: '', options: ['', '', '', ''], correctAnswer: '', marks: 1, negativeMarks: 0, explanation: '' };
+      questions.push(q);
+      renderQuestions();
+      calcTotalMarks();
+    }
+
+    function removeQuestion(idx) {
+      if (questions.length <= 1) { showToast('At least one question is required.', 'error'); return; }
+      questions.splice(idx, 1); renderQuestions(); calcTotalMarks();
+    }
+
+    function calcTotalMarks() {
+      var total = questions.reduce(function (s, q) { return s + (parseInt(q.marks) || 1); }, 0);
+      var el = document.getElementById('f-total-marks');
+      if (el) { el.value = total; }
+    }
+
+    function renderQuestions() {
+      var c = document.getElementById('questions-container');
+      c.innerHTML = '';
+      document.getElementById('q-count').textContent = questions.length;
+      questions.forEach(function (q, i) {
+        var div = document.createElement('div');
+        div.className = 'q-card';
+        var optHtml = '';
+        if (q.type === 'multiple-choice') {
+          optHtml = '<div class="opts-list">';
+          (q.options.length ? q.options : ['', '', '', '']).forEach(function (opt, oi) {
+            optHtml += '<div class="opt-row">' +
+              '<input class="opt-radio" type="radio" name="correct_' + i + '" value="' + oi + '"' + (q.correctAnswer === String(oi) ? ' checked' : '') + ' onchange="setCorrect(' + i + ',\'' + oi + '\')" title="Mark as correct answer"/>' +
+              '<input class="opt-input" type="text" placeholder="Option ' + (oi + 1) + '" value="' + escHtml(opt) + '" oninput="updateOption(' + i + ',' + oi + ',this.value)"/>' +
+              '</div>';
+          });
+          optHtml += '</div><div style="font-size:11px;color:var(--text-muted);margin-top:6px">🔘 Select the radio button next to the correct answer</div>';
+        } else if (q.type === 'true-false') {
+          optHtml = '<div style="display:flex;gap:16px;margin-top:10px">' +
+            '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);cursor:pointer"><input type="radio" name="correct_' + i + '" value="True"' + (q.correctAnswer === 'True' ? ' checked' : '') + ' onchange="setCorrect(' + i + ',\'True\')"/> True</label>' +
+            '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);cursor:pointer"><input type="radio" name="correct_' + i + '" value="False"' + (q.correctAnswer === 'False' ? ' checked' : '') + ' onchange="setCorrect(' + i + ',\'False\')"/> False</label>' +
+            '</div>';
+        } else {
+          optHtml = '<div class="form-group" style="margin-top:10px"><label>Expected Answer (for reference)</label><input type="text" value="' + escHtml(q.correctAnswer || '') + '" placeholder="Correct answer…" oninput="setCorrect(' + i + ',this.value)"/></div>';
+        }
+        div.innerHTML =
+          '<div class="q-card-head">' +
+          '<span class="q-num-badge">Q' + (i + 1) + '</span>' +
+          '<select onchange="changeType(' + i + ',this.value)" style="padding:5px 10px;font-size:12px">' +
+          '<option value="multiple-choice"' + (q.type === 'multiple-choice' ? ' selected' : '') + '>Multiple Choice</option>' +
+          '<option value="true-false"' + (q.type === 'true-false' ? ' selected' : '') + '>True / False</option>' +
+          '<option value="short-answer"' + (q.type === 'short-answer' ? ' selected' : '') + '>Short Answer</option>' +
+          '</select>' +
+          '<div style="display:flex;align-items:center;gap:6px">' +
+          '<input type="number" value="' + (q.marks || 1) + '" min="1" max="100" style="width:60px;padding:5px 8px;font-size:12px" title="Marks for correct answer" oninput="updateMarks(' + i + ',this.value)"/>' +
+          '<span style="font-size:11px;color:#6BDD9A">+marks</span>' +
+          '<input type="number" value="' + (q.negativeMarks || 0) + '" min="0" max="100" step="0.25" style="width:60px;padding:5px 8px;font-size:12px;border-color:rgba(252,133,133,.4)" title="Marks deducted for wrong answer" oninput="updateNegMarks(' + i + ',this.value)"/>' +
+          '<span style="font-size:11px;color:#FC8585">-neg</span>' +
+          '</div>' +
+          '<button class="remove-q-btn" onclick="removeQuestion(' + i + ')">✕ Remove</button>' +
+          '</div>' +
+          '<textarea placeholder="Question text…" oninput="updateText(' + i + ',this.value)" style="width:100%;min-height:60px">' + escHtml(q.text) + '</textarea>' +
+          optHtml +
+          '<div class="form-group" style="margin-top:10px"><label>Explanation (optional)</label><input type="text" value="' + escHtml(q.explanation || '') + '" placeholder="Shown after exam if results are enabled…" oninput="updateExplanation(' + i + ',this.value)"/></div>';
+        c.appendChild(div);
+      });
+    }
+
+    function changeType(i, type) {
+      questions[i].type = type;
+      if (type === 'multiple-choice') questions[i].options = ['', '', '', ''];
+      else if (type === 'true-false') { questions[i].options = ['True', 'False']; questions[i].correctAnswer = ''; }
+      else questions[i].options = [];
+      questions[i].correctAnswer = '';
+      renderQuestions();
+    }
+    function updateText(i, v) { questions[i].text = v; }
+    function updateOption(i, oi, v) {
+      if (!questions[i].options) questions[i].options = ['', '', '', ''];
+      questions[i].options[oi] = v;
+    }
+    function setCorrect(i, v) { questions[i].correctAnswer = String(v); }
+    function updateMarks(i, v) { questions[i].marks = parseInt(v) || 1; calcTotalMarks(); }
+    function updateNegMarks(i, v) { questions[i].negativeMarks = parseFloat(v) || 0; }
+    function updateExplanation(i, v) { questions[i].explanation = v; }
+
+    function saveExam() {
+      var title = document.getElementById('f-title').value.trim();
+      var duration = parseInt(document.getElementById('f-duration').value) || 0;
+      var totalMarks = questions.reduce(function (s, q) { return s + (parseInt(q.marks) || 1); }, 0);
+      var passingMarks = parseInt(document.getElementById('f-passing-marks').value) || 0;
+      if (!title) { showToast('Exam title is required.', 'error'); document.getElementById('f-title').focus(); return; }
+      if (!duration || duration < 1) { showToast('Duration must be at least 1 minute.', 'error'); return; }
+      if (!passingMarks) { showToast('Passing marks required.', 'error'); return; }
+      if (passingMarks > totalMarks) { showToast('Passing marks cannot exceed total marks (' + totalMarks + ').', 'error'); return; }
+      for (var i = 0; i < questions.length; i++) {
+        if (!questions[i].text.trim()) { showToast('Question ' + (i + 1) + ' text is empty.', 'error'); return; }
+        if (questions[i].type === 'multiple-choice') {
+          var filled = questions[i].options.filter(function (o) { return o.trim(); });
+          if (filled.length < 2) { showToast('Question ' + (i + 1) + ' needs at least 2 options.', 'error'); return; }
+          if (!questions[i].correctAnswer && questions[i].correctAnswer !== '0') { showToast('Question ' + (i + 1) + ': select the correct answer.', 'error'); return; }
+        } else if (questions[i].type === 'true-false') {
+          if (!questions[i].correctAnswer) { showToast('Question ' + (i + 1) + ': select True or False.', 'error'); return; }
+        }
+      }
+      var btn = document.getElementById('save-btn');
+      btn.disabled = true; btn.textContent = 'Saving…';
+      var examCode = document.getElementById('f-exam-code').value.trim().toUpperCase();
+      if (!examCode) { showToast('Exam code is required.', 'error'); btn.disabled = false; btn.textContent = '✓ Create Exam'; return; }
+      var examData = {
+        title: title,
+        description: document.getElementById('f-desc').value.trim(),
+        subject: document.getElementById('f-subject').value.trim(),
+        duration: duration, totalMarks: totalMarks, passingMarks: passingMarks,
+        examCode: examCode,
+        allowBacktrack: document.getElementById('f-backtrack').checked,
+        shuffleQuestions: document.getElementById('f-shuffle').checked,
+        showResults: document.getElementById('f-show-results').checked
+      };
+      api('/api/teacher/exams', { method: 'POST', body: JSON.stringify(examData) }).then(function (exam) {
+        if (exam.error) { showToast(exam.error, 'error'); btn.disabled = false; btn.textContent = '✓ Create Exam'; return; }
+        var qPayload = questions.map(function (q, idx) {
+          return { type: q.type, text: q.text, options: q.type === 'multiple-choice' ? q.options : (q.type === 'true-false' ? ['True', 'False'] : []), correctAnswer: q.correctAnswer, marks: q.marks || 1, negativeMarks: q.negativeMarks || 0, explanation: q.explanation || '' };
+        });
+        return api('/api/teacher/exams/' + exam.id + '/questions/bulk', { method: 'POST', body: JSON.stringify({ questions: qPayload }) }).then(function (r) {
+          if (r.error) { showToast(r.error, 'error'); btn.disabled = false; btn.textContent = '✓ Create Exam'; return; }
+          showToast('Exam created successfully!', 'ok');
+          setTimeout(function () { window.location.href = 'exam-management.html'; }, 1000);
+        });
+      }).catch(function (err) { showToast('Failed to create exam. Is backend running?', 'error'); btn.disabled = false; btn.textContent = '✓ Create Exam'; });
+    }
+
+    function logout() {
+      fetch(BASE + '/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).catch(function () { }).finally(function () {
+        localStorage.removeItem('teacher_token'); localStorage.removeItem('teacher_user'); window.location.href = 'login.html';
+      });
+    }
+
+    // Start with 1 empty question
+    addQuestion();
+  </script>
+</body>
+
+</html>

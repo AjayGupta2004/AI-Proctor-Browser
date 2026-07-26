@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>ProctorAI — Live Monitoring</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh
+    }
+
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden
+    }
+
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: #0D0F16;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 14px 0
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px
+    }
+
+    .sidebar-logo-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #0F1D2E;
+      border: 1px solid rgba(55, 138, 221, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .sidebar-logo-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary)
+    }
+
+    .sidebar-logo-sub {
+      font-size: 10px;
+      color: var(--text-muted)
+    }
+
+    .nav-section {
+      padding: 6px 12px 2px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-hint)
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      margin: 1px 8px;
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+      border: none;
+      background: transparent;
+      width: calc(100% - 16px)
+    }
+
+    .nav-item:hover {
+      background: var(--bg-raised);
+      color: var(--text-secondary)
+    }
+
+    .nav-item.active {
+      background: var(--blue-bg);
+      color: #7BB8E8;
+      border: 1px solid rgba(55, 138, 221, .2)
+    }
+
+    .nav-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border)
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #185FA5, #0F3520);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #E2E4EC;
+      flex-shrink: 0
+    }
+
+    .user-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary)
+    }
+
+    .user-role {
+      font-size: 10px;
+      color: var(--text-muted)
+    }
+
+    .logout-btn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      background: transparent;
+      border: 1px solid var(--border-md);
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit
+    }
+
+    .logout-btn:hover {
+      background: var(--red-bg);
+      border-color: var(--red-border);
+      color: #FC8585
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto
+    }
+
+    .page-header {
+      padding: 20px 24px 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface)
+    }
+
+    .page-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary)
+    }
+
+    .page-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px
+    }
+
+    .content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+      flex-wrap: wrap
+    }
+
+    select.exam-select {
+      padding: 10px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      min-width: 280px;
+      transition: border-color .15s
+    }
+
+    select.exam-select:focus {
+      border-color: rgba(55, 138, 221, .6)
+    }
+
+    .mini-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap
+    }
+
+    .mini-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 12px 18px;
+      text-align: center
+    }
+
+    .mini-stat-val {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1
+    }
+
+    .mini-stat-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px
+    }
+
+    .sessions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px
+    }
+
+    .session-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      transition: border-color .15s
+    }
+
+    .session-card:hover {
+      border-color: var(--border-md)
+    }
+
+    .sc-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px
+    }
+
+    .sc-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary)
+    }
+
+    .sc-roll {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px
+    }
+
+    .sc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      border: 1px solid
+    }
+
+    .sc-active {
+      background: var(--green-bg);
+      border-color: rgba(29, 158, 117, .35);
+      color: #5DCAA5
+    }
+
+    .risk-wrap {
+      margin-top: 10px
+    }
+
+    .risk-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px
+    }
+
+    .risk-track {
+      height: 4px;
+      background: var(--bg-raised);
+      border-radius: 2px;
+      overflow: hidden
+    }
+
+    .risk-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width .4s
+    }
+
+    .sc-stats {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      flex-wrap: wrap
+    }
+
+    .sc-stat {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-muted)
+    }
+
+    .sc-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 8px
+    }
+
+    .auto-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted)
+    }
+
+    .empty-state {
+      padding: 48px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg)
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      opacity: .4
+    }
+
+    .empty-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary)
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-lg);
+      padding: 12px 18px;
+      font-size: 13px;
+      color: var(--text-primary);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+      max-width: 320px
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    #toast.toast-err {
+      border-color: var(--red-border);
+      color: #FC8585
+    }
+
+    #toast.toast-ok {
+      border-color: var(--green-border);
+      color: #5DCAA5
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+      <path d="M11 2L4 5v6c0 4.4 3 8.2 7 9 4-.8 7-4.6 7-9V5L11 2Z" stroke="#378ADD" stroke-width="1.2"
+        fill="rgba(55,138,221,0.1)" />
+    </svg>
+    <span class="topbar-title">ProctorAI — Live Monitoring</span>
+    <div class="spacer"></div>
+    <div class="auto-badge">
+      <div class="dot dot-green dot-sm pulse"></div>Auto-refresh 15s
+    </div>
+    <div class="pill pill-blue" style="margin-left:10px">
+      <div class="dot dot-blue dot-sm"></div><span id="topbar-user">Teacher</span>
+    </div>
+  </div>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+            <path d="M11 2L4 5v6c0 4.4 3 8.2 7 9 4-.8 7-4.6 7-9V5L11 2Z" stroke="#378ADD" stroke-width="1.2"
+              fill="rgba(55,138,221,0.1)" />
+          </svg></div>
+        <div>
+          <div class="sidebar-logo-text">ProctorAI</div>
+          <div class="sidebar-logo-sub">Teacher Console</div>
+        </div>
+      </div>
+      <div class="nav-section">Main</div>
+      <a href="teacher-dashboard.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+        </svg>Dashboard</a>
+      <a href="exam-management.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2" />
+          <path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Exam Management</a>
+      <a href="create-exam.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" />
+          <path d="M8 5v6M5 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Create Exam</a>
+      <div class="nav-section" style="margin-top:8px">Monitoring</div>
+      <a href="live-monitoring.html" class="nav-item active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="3" stroke="#378ADD" stroke-width="1.2" />
+          <circle cx="8" cy="8" r="6" stroke="#378ADD" stroke-width="1.2" stroke-dasharray="2 2" />
+        </svg>Live Monitoring</a>
+      <a href="exam-results.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <path d="M2 12V8M6 12V5M10 12V7M14 12V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Results &amp; Reports</a>
+      <a href="student-records.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2" />
+          <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Student Records</a>
+      <div class="sidebar-bottom">
+        <div class="user-chip">
+          <div class="user-avatar" id="user-avatar">T</div>
+          <div>
+            <div class="user-name" id="user-name">Teacher</div>
+            <div class="user-role">Teacher</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Sign out</button>
+      </div>
+    </nav>
+    <main class="main">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <div class="page-title">Live Monitoring</div>
+            <div class="page-sub" id="page-sub">Monitor active exam sessions in real time.</div>
+          </div>
+          <button class="btn" onclick="loadSessions()">↺ Refresh</button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="top-bar">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">Active Exam</div>
+            <select class="exam-select" id="exam-select" onchange="onExamChange(this.value)">
+              <option value="">— Select an active exam —</option>
+            </select>
+          </div>
+          <div class="mini-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-val" id="s-active">0</div>
+              <div class="mini-stat-lbl">Active Students</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-val" id="s-violations" style="color:#FC8585">0</div>
+              <div class="mini-stat-lbl">Total Violations</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-val" id="s-risk" style="color:#EF9F27">0%</div>
+              <div class="mini-stat-lbl">Avg Risk</div>
+            </div>
+          </div>
+        </div>
+        <div id="sessions-area">
+          <div class="empty-state">
+            <div class="empty-icon">🔭</div>
+            <div class="empty-title">Select an active exam to start monitoring</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div id="toast"></div>
+  <script>
+    var token = localStorage.getItem('teacher_token');
+    var user = null;
+    try { user = JSON.parse(localStorage.getItem('teacher_user') || 'null'); } catch (_) { }
+    if (!token || !user) { window.location.href = 'login.html'; }
+    document.getElementById('topbar-user').textContent = user ? user.fullName : 'Teacher';
+    document.getElementById('user-name').textContent = user ? user.fullName : 'Teacher';
+    document.getElementById('user-avatar').textContent = user ? user.fullName.charAt(0).toUpperCase() : 'T';
+
+    var BASE = 'http://localhost:4000';
+    var currentExamId = '';
+    var refreshTimer = null;
+    var urlExamId = new URLSearchParams(window.location.search).get('examId');
+
+    function api(path, opts) {
+      return fetch(BASE + path, Object.assign({ headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } }, opts || {})).then(function (r) { return r.json(); });
+    }
+    var toastTimer = null;
+    function showToast(msg, type) { var t = document.getElementById('toast'); t.textContent = msg; t.className = 'show ' + (type === 'error' ? 'toast-err' : 'toast-ok'); clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.className = ''; }, 3500); }
+    function escHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    function onExamChange(id) {
+      currentExamId = id;
+      clearInterval(refreshTimer);
+      if (!id) {
+        document.getElementById('sessions-area').innerHTML = '<div class="empty-state"><div class="empty-icon">🔭</div><div class="empty-title">Select an active exam to start monitoring</div></div>';
+        document.getElementById('s-active').textContent = '0'; document.getElementById('s-violations').textContent = '0'; document.getElementById('s-risk').textContent = '0%';
+        return;
+      }
+      loadSessions();
+      refreshTimer = setInterval(loadSessions, 15000);
+    }
+
+    function loadSessions() {
+      if (!currentExamId) return;
+      api('/api/teacher/exams/' + currentExamId + '/live').then(function (data) {
+        if (data.error) { showToast(data.error, 'error'); return; }
+        var sessions = data.sessions || [];
+        document.getElementById('s-active').textContent = sessions.length;
+        var totalViol = sessions.reduce(function (s, x) { return s + (x.violations || 0); }, 0);
+        var avgRisk = sessions.length ? Math.round(sessions.reduce(function (s, x) { return s + (x.risk_score || 0); }, 0) / sessions.length) : 0;
+        document.getElementById('s-violations').textContent = totalViol;
+        document.getElementById('s-risk').textContent = avgRisk + '%';
+        document.getElementById('page-sub').textContent = 'Monitoring ' + (data.exam ? escHtml(data.exam.title) : 'exam') + ' — ' + sessions.length + ' student(s) active';
+
+        if (sessions.length === 0) {
+          document.getElementById('sessions-area').innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">No students currently taking this exam</div><div style="font-size:12px;color:var(--text-muted)">Sessions will appear here when students join.</div></div>';
+          return;
+        }
+
+        var html = '<div class="sessions-grid">';
+        sessions.forEach(function (s) {
+          var risk = s.risk_score || 0;
+          var riskColor = risk < 30 ? '#1D9E75' : risk < 65 ? '#EF9F27' : '#E24B4A';
+          var startedAgo = '';
+          if (s.started_at) { var mins = Math.round((Date.now() - new Date(s.started_at).getTime()) / 60000); startedAgo = mins + 'm ago'; }
+          html += '<div class="session-card">' +
+            '<div class="sc-head">' +
+            '<div><div class="sc-name">' + escHtml(s.student_name) + '</div><div class="sc-roll">' + escHtml(s.student_roll) + '</div></div>' +
+            '<span class="sc-badge sc-active"><span class="dot dot-green dot-sm pulse"></span>Active</span>' +
+            '</div>' +
+            '<div class="sc-stats">' +
+            '<div class="sc-stat"><span style="color:' + (s.violations > 0 ? '#FC8585' : '#5DCAA5') + '">⚠ ' + (s.violations || 0) + ' violation' + (s.violations === 1 ? '' : 's') + '</span></div>' +
+            '</div>' +
+            '<div class="risk-wrap">' +
+            '<div class="risk-label-row"><span>Risk Score</span><span style="font-weight:600;color:' + riskColor + '">' + risk + '%</span></div>' +
+            '<div class="risk-track"><div class="risk-fill" style="width:' + risk + '%;background:' + riskColor + '"></div></div>' +
+            '</div>' +
+            (startedAgo ? '<div class="sc-time">Started ' + startedAgo + '</div>' : '') +
+            '</div>';
+        });
+        html += '</div>';
+        document.getElementById('sessions-area').innerHTML = html;
+      }).catch(function () {/* silent on auto-refresh errors */ });
+    }
+
+    function logout() {
+      clearInterval(refreshTimer);
+      fetch(BASE + '/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).catch(function () { }).finally(function () { localStorage.removeItem('teacher_token'); localStorage.removeItem('teacher_user'); window.location.href = 'login.html'; });
+    }
+
+    // Load active exams
+    api('/api/teacher/exams?status=active').then(function (exams) {
+      if (!Array.isArray(exams)) return;
+      var sel = document.getElementById('exam-select');
+      if (exams.length === 0) {
+        sel.innerHTML = '<option value="">No active exams — activate one from Exam Management</option>';
+        return;
+      }
+      exams.forEach(function (e) {
+        var opt = document.createElement('option'); opt.value = e.id; opt.textContent = e.title; sel.appendChild(opt);
+      });
+      if (urlExamId) { sel.value = urlExamId; onExamChange(urlExamId); }
+      else if (exams.length === 1) { sel.value = exams[0].id; onExamChange(exams[0].id); }
+    }).catch(function () { showToast('Failed to load active exams.', 'error'); });
+  </script>
+</body>
+
+</html>

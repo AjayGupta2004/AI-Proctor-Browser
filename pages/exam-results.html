@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>ProctorAI — Exam Results</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh
+    }
+
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden
+    }
+
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: #0D0F16;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 14px 0
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px
+    }
+
+    .sidebar-logo-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #0F1D2E;
+      border: 1px solid rgba(55, 138, 221, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .sidebar-logo-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary)
+    }
+
+    .sidebar-logo-sub {
+      font-size: 10px;
+      color: var(--text-muted)
+    }
+
+    .nav-section {
+      padding: 6px 12px 2px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-hint)
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      margin: 1px 8px;
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+      border: none;
+      background: transparent;
+      width: calc(100% - 16px)
+    }
+
+    .nav-item:hover {
+      background: var(--bg-raised);
+      color: var(--text-secondary)
+    }
+
+    .nav-item.active {
+      background: var(--blue-bg);
+      color: #7BB8E8;
+      border: 1px solid rgba(55, 138, 221, .2)
+    }
+
+    .nav-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border)
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #185FA5, #0F3520);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #E2E4EC;
+      flex-shrink: 0
+    }
+
+    .user-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary)
+    }
+
+    .user-role {
+      font-size: 10px;
+      color: var(--text-muted)
+    }
+
+    .logout-btn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      background: transparent;
+      border: 1px solid var(--border-md);
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit
+    }
+
+    .logout-btn:hover {
+      background: var(--red-bg);
+      border-color: var(--red-border);
+      color: #FC8585
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto
+    }
+
+    .page-header {
+      padding: 20px 24px 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface)
+    }
+
+    .page-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary)
+    }
+
+    .page-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px
+    }
+
+    .content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px
+    }
+
+    .stat-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px
+    }
+
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px
+    }
+
+    .stat-val {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1
+    }
+
+    .stat-lbl {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px
+    }
+
+    .select-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap
+    }
+
+    select.exam-select {
+      padding: 10px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      min-width: 300px;
+      transition: border-color .15s
+    }
+
+    select.exam-select:focus {
+      border-color: rgba(55, 138, 221, .6)
+    }
+
+    .table-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    .results-table th {
+      padding: 10px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: left;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: .05em
+    }
+
+    .results-table td {
+      padding: 12px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+      vertical-align: middle
+    }
+
+    .results-table tr:last-child td {
+      border-bottom: none
+    }
+
+    .results-table tr:hover td {
+      background: rgba(255, 255, 255, .02)
+    }
+
+    .pass-badge {
+      display: inline-flex;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid
+    }
+
+    .pass {
+      background: #0D1F10;
+      border-color: rgba(29, 158, 117, .4);
+      color: #5DCAA5
+    }
+
+    .fail {
+      background: #1A0B0B;
+      border-color: rgba(226, 75, 74, .35);
+      color: #FC8585
+    }
+
+    .rank-badge {
+      display: inline-flex;
+      width: 26px;
+      height: 26px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700
+    }
+
+    .rank-1 {
+      background: #1A1208;
+      color: #EF9F27;
+      border: 1px solid rgba(239, 159, 39, .4)
+    }
+
+    .rank-2 {
+      background: #0D101A;
+      color: #9294A0;
+      border: 1px solid rgba(255, 255, 255, .12)
+    }
+
+    .rank-3 {
+      background: #1A0E08;
+      color: #C48B60;
+      border: 1px solid rgba(196, 139, 96, .3)
+    }
+
+    .rank-n {
+      background: var(--bg-raised);
+      color: var(--text-muted);
+      border: 1px solid var(--border)
+    }
+
+    .pct-bar-wrap {
+      width: 80px;
+      background: var(--bg-raised);
+      border-radius: 3px;
+      height: 5px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 6px
+    }
+
+    .pct-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .4s
+    }
+
+    .empty-state {
+      padding: 48px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-muted)
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      opacity: .4
+    }
+
+    .empty-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary)
+    }
+
+    .spinner-wrap {
+      padding: 40px;
+      display: flex;
+      justify-content: center
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border-md);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .6s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-lg);
+      padding: 12px 18px;
+      font-size: 13px;
+      color: var(--text-primary);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+      max-width: 320px
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    #toast.toast-err {
+      border-color: var(--red-border);
+      color: #FC8585
+    }
+
+    #toast.toast-ok {
+      border-color: var(--green-border);
+      color: #5DCAA5
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+      <path d="M11 2L4 5v6c0 4.4 3 8.2 7 9 4-.8 7-4.6 7-9V5L11 2Z" stroke="#378ADD" stroke-width="1.2"
+        fill="rgba(55,138,221,0.1)" />
+    </svg>
+    <span class="topbar-title">ProctorAI — Results &amp; Reports</span>
+    <div class="spacer"></div>
+    <div class="pill pill-blue">
+      <div class="dot dot-blue dot-sm"></div><span id="topbar-user">Teacher</span>
+    </div>
+  </div>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+            <path d="M11 2L4 5v6c0 4.4 3 8.2 7 9 4-.8 7-4.6 7-9V5L11 2Z" stroke="#378ADD" stroke-width="1.2"
+              fill="rgba(55,138,221,0.1)" />
+          </svg></div>
+        <div>
+          <div class="sidebar-logo-text">ProctorAI</div>
+          <div class="sidebar-logo-sub">Teacher Console</div>
+        </div>
+      </div>
+      <div class="nav-section">Main</div>
+      <a href="teacher-dashboard.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+        </svg>Dashboard</a>
+      <a href="exam-management.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2" />
+          <path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Exam Management</a>
+      <a href="create-exam.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" />
+          <path d="M8 5v6M5 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Create Exam</a>
+      <div class="nav-section" style="margin-top:8px">Monitoring</div>
+      <a href="live-monitoring.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2" />
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 2" />
+        </svg>Live Monitoring</a>
+      <a href="exam-results.html" class="nav-item active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <path d="M2 12V8M6 12V5M10 12V7M14 12V3" stroke="#378ADD" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Results &amp; Reports</a>
+      <a href="student-records.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2" />
+          <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Student Records</a>
+      <div class="sidebar-bottom">
+        <div class="user-chip">
+          <div class="user-avatar" id="user-avatar">T</div>
+          <div>
+            <div class="user-name" id="user-name">Teacher</div>
+            <div class="user-role">Teacher</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Sign out</button>
+      </div>
+    </nav>
+    <main class="main">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <div class="page-title">Results &amp; Reports</div>
+            <div class="page-sub">View exam performance and export data.</div>
+          </div>
+          <button class="btn btn-success" id="export-btn" style="display:none" onclick="exportCSV()">⬇ Export
+            CSV</button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="select-row">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">Select Exam</div>
+            <select class="exam-select" id="exam-select" onchange="onExamChange(this.value)">
+              <option value="">— Choose an exam —</option>
+            </select>
+          </div>
+        </div>
+        <div id="stats-section" style="display:none">
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-icon" style="background:var(--blue-bg)">👥</div>
+              </div>
+              <div class="stat-val" id="s-total">0</div>
+              <div class="stat-lbl">Total Students</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-icon" style="background:var(--purple-bg)">📊</div>
+              </div>
+              <div class="stat-val" id="s-avg">0</div>
+              <div class="stat-lbl">Avg Score</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-icon" style="background:var(--green-bg)">🏆</div>
+              </div>
+              <div class="stat-val" id="s-high">0</div>
+              <div class="stat-lbl">Highest Score</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-icon" style="background:var(--amber-bg)">✅</div>
+              </div>
+              <div class="stat-val" id="s-pass">0%</div>
+              <div class="stat-lbl">Pass Rate</div>
+            </div>
+          </div>
+        </div>
+        <div id="results-area">
+          <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <div class="empty-title">Select an exam to view results</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div id="toast"></div>
+  <script>
+    var token = localStorage.getItem('teacher_token');
+    var user = null;
+    try { user = JSON.parse(localStorage.getItem('teacher_user') || 'null'); } catch (_) { }
+    if (!token || !user) { window.location.href = 'login.html'; }
+    document.getElementById('topbar-user').textContent = user ? user.fullName : 'Teacher';
+    document.getElementById('user-name').textContent = user ? user.fullName : 'Teacher';
+    document.getElementById('user-avatar').textContent = user ? user.fullName.charAt(0).toUpperCase() : 'T';
+
+    var BASE = 'http://localhost:4000';
+    var currentExamId = '';
+    var urlExamId = new URLSearchParams(window.location.search).get('examId');
+
+    function api(path, opts) {
+      return fetch(BASE + path, Object.assign({ headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } }, opts || {})).then(function (r) { return r.json(); });
+    }
+    var toastTimer = null;
+    function showToast(msg, type) {
+      var t = document.getElementById('toast'); t.textContent = msg; t.className = 'show ' + (type === 'error' ? 'toast-err' : 'toast-ok');
+      clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.className = ''; }, 3500);
+    }
+    function escHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    function onExamChange(id) {
+      currentExamId = id;
+      if (!id) { document.getElementById('stats-section').style.display = 'none'; document.getElementById('export-btn').style.display = 'none'; document.getElementById('results-area').innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Select an exam to view results</div></div>'; return; }
+      loadResults(id);
+    }
+
+    function loadResults(id) {
+      document.getElementById('results-area').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+      document.getElementById('stats-section').style.display = 'none';
+      api('/api/teacher/exams/' + id + '/results').then(function (data) {
+        if (data.error) { showToast(data.error, 'error'); return; }
+        var s = data.statistics || {};
+        document.getElementById('s-total').textContent = s.totalStudents || 0;
+        document.getElementById('s-avg').textContent = (s.avgScore || 0) + '/' + (data.exam ? data.exam.total_marks : '?');
+        document.getElementById('s-high').textContent = (s.highestScore || 0);
+        document.getElementById('s-pass').textContent = (s.passRate || 0) + '%';
+        document.getElementById('stats-section').style.display = 'block';
+        document.getElementById('export-btn').style.display = 'inline-flex';
+        var sessions = data.sessions || [];
+        if (sessions.length === 0) {
+          document.getElementById('results-area').innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">No submitted results yet</div><div style="font-size:12px;color:var(--text-muted)">Results appear once students submit the exam.</div></div>';
+          return;
+        }
+        var totalMarks = data.exam ? data.exam.total_marks : 100;
+        var passingMarks = data.exam ? data.exam.passing_marks : 40;
+        var html = '<div class="table-wrap"><table class="results-table"><thead><tr><th>Rank</th><th>Student</th><th>Roll No</th><th>Score</th><th>Percentage</th><th>Status</th><th>Violations</th><th>Risk</th><th>Submitted</th></tr></thead><tbody>';
+        sessions.forEach(function (s, i) {
+          var pct = totalMarks ? Math.round((s.score || 0) / totalMarks * 100) : 0;
+          var passed = (s.score || 0) >= passingMarks;
+          var rankCls = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
+          var barColor = pct >= 60 ? '#1D9E75' : pct >= 40 ? '#EF9F27' : '#E24B4A';
+          var sub = s.submitted_at ? new Date(s.submitted_at).toLocaleString() : '-';
+          html += '<tr>' +
+            '<td><span class="rank-badge ' + rankCls + '">#' + (i + 1) + '</span></td>' +
+            '<td style="font-weight:500;color:var(--text-primary)">' + escHtml(s.student_name) + '</td>' +
+            '<td>' + escHtml(s.student_roll) + '</td>' +
+            '<td style="font-weight:600;color:var(--text-primary)">' + (s.score || 0) + '/' + totalMarks + '</td>' +
+            '<td><span style="font-weight:600;color:' + barColor + '">' + pct + '%</span><div class="pct-bar-wrap"><div class="pct-bar" style="width:' + pct + '%;background:' + barColor + '"></div></div></td>' +
+            '<td><span class="pass-badge ' + (passed ? 'pass' : 'fail') + '">' + (passed ? 'Pass' : 'Fail') + '</span></td>' +
+            '<td style="color:' + (s.violations > 0 ? '#FC8585' : '#5DCAA5') + '">' + (s.violations || 0) + '</td>' +
+            '<td>' + (s.risk_score || 0) + '%</td>' +
+            '<td style="font-size:11px;color:var(--text-muted)">' + sub + '</td>' +
+            '</tr>';
+        });
+        html += '</tbody></table></div>';
+        document.getElementById('results-area').innerHTML = html;
+      }).catch(function () { showToast('Failed to load results.', 'error'); });
+    }
+
+    function exportCSV() {
+      if (!currentExamId) return;
+      var url = BASE + '/api/teacher/exams/' + currentExamId + '/results/export';
+      fetch(url, { headers: { 'Authorization': 'Bearer ' + token } }).then(function (r) {
+        if (!r.ok) { showToast('Export failed.', 'error'); return; }
+        return r.blob();
+      }).then(function (blob) {
+        if (!blob) return;
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'exam-results.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }).catch(function () { showToast('Export failed.', 'error'); });
+    }
+
+    function logout() {
+      fetch(BASE + '/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).catch(function () { }).finally(function () { localStorage.removeItem('teacher_token'); localStorage.removeItem('teacher_user'); window.location.href = 'login.html'; });
+    }
+
+    // Load exams for dropdown
+    api('/api/teacher/exams').then(function (exams) {
+      if (!Array.isArray(exams)) return;
+      var sel = document.getElementById('exam-select');
+      exams.forEach(function (e) {
+        var opt = document.createElement('option');
+        opt.value = e.id; opt.textContent = e.title + ' (' + e.status + ')';
+        sel.appendChild(opt);
+      });
+      if (urlExamId) { sel.value = urlExamId; onExamChange(urlExamId); }
+    }).catch(function () { showToast('Failed to load exams.', 'error'); });
+  </script>
+</body>
+
+</html>

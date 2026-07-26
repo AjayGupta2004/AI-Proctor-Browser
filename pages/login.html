@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProctorAI — Login</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0A0C11;
+      padding: 24px;
+    }
+
+    /* ── Background grid pattern ─────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(55, 138, 221, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(55, 138, 221, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page-wrap {
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── Logo / header ───────────────────────── */
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: #0F1D2E;
+      border: 1px solid rgba(55, 138, 221, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 500;
+      color: #E2E4EC;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-tagline {
+      font-size: 12px;
+      color: #4A4D5A;
+    }
+
+    /* ── Card ────────────────────────────────── */
+    .auth-card {
+      background: #13161E;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    /* ── Role selector ───────────────────────── */
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .role-btn {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: #5A5D6B;
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .role-btn:hover {
+      color: #9294A0;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .role-btn.active-student {
+      color: #5DCAA5;
+      border-bottom-color: #1D9E75;
+      background: rgba(29, 158, 117, 0.04);
+    }
+
+    .role-btn.active-teacher {
+      color: #7BB8E8;
+      border-bottom-color: #378ADD;
+      background: rgba(55, 138, 221, 0.04);
+    }
+
+    .role-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .role-btn.active-student .role-icon {
+      background: #091510;
+    }
+
+    .role-btn.active-teacher .role-icon {
+      background: #081526;
+    }
+
+    .role-btn:not(.active-student):not(.active-teacher) .role-icon {
+      background: #1A1D28;
+    }
+
+    /* ── Role badge ──────────────────────────── */
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      border: 1px solid;
+      margin-bottom: 4px;
+    }
+
+    .rb-student {
+      background: #091510;
+      border-color: #1A5230;
+      color: #5DCAA5;
+    }
+
+    .rb-teacher {
+      background: #081526;
+      border-color: #1A3D6B;
+      color: #7BB8E8;
+    }
+
+    /* ── Form body ───────────────────────────── */
+    .form-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .form-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+
+    .form-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #E2E4EC;
+    }
+
+    .form-sub {
+      font-size: 12px;
+      color: #5A5D6B;
+    }
+
+    /* ── Input fields ────────────────────────── */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: #7A7D8A;
+      font-weight: 500;
+    }
+
+    .field input {
+      background: #0D0F16;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 8px;
+      padding: 10px 13px;
+      font-size: 13px;
+      color: #E2E4EC;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+      width: 100%;
+    }
+
+    .field input::placeholder {
+      color: #3E4150;
+    }
+
+    .field input:focus {
+      border-color: rgba(55, 138, 221, 0.5);
+    }
+
+    .field input:focus.student-focus {
+      border-color: rgba(29, 158, 117, 0.5);
+    }
+
+    /* ── Password row ────────────────────────── */
+    .pw-row {
+      position: relative;
+    }
+
+    .pw-row input {
+      padding-right: 40px;
+    }
+
+    .pw-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #4A4D5A;
+      background: none;
+      border: none;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+
+    .pw-toggle:hover {
+      color: #9294A0;
+    }
+
+    /* ── Remember + Forgot ───────────────────── */
+    .row-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #5A5D6B;
+      user-select: none;
+    }
+
+    .remember input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: #1D9E75;
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      font-size: 12px;
+      color: #4A4D5A;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .forgot-link:hover {
+      color: #9294A0;
+    }
+
+    /* ── Submit button ───────────────────────── */
+    .submit-btn {
+      width: 100%;
+      padding: 11px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid;
+      transition: all 0.2s;
+      font-family: inherit;
+      margin-top: 4px;
+    }
+
+    .submit-student {
+      background: #0F2A1A;
+      border-color: #1D9E75;
+      color: #5DCAA5;
+    }
+
+    .submit-student:hover {
+      background: #143520;
+    }
+
+    .submit-teacher {
+      background: #0F1D2E;
+      border-color: #378ADD;
+      color: #7BB8E8;
+    }
+
+    .submit-teacher:hover {
+      background: #142540;
+    }
+
+    /* ── Divider ─────────────────────────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: #3A3D4A;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* ── Signup link row ─────────────────────── */
+    .switch-row {
+      text-align: center;
+      font-size: 12px;
+      color: #5A5D6B;
+      padding: 0 24px 20px;
+    }
+
+    .switch-link {
+      cursor: pointer;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .switch-link-green {
+      color: #1D9E75;
+    }
+
+    .switch-link-green:hover {
+      color: #5DCAA5;
+    }
+
+    .switch-link-blue {
+      color: #378ADD;
+    }
+
+    .switch-link-blue:hover {
+      color: #7BB8E8;
+    }
+
+    /* ── Student ID chip (only for student) ───── */
+    .student-id-note {
+      font-size: 11px;
+      color: #4A4D5A;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* ── Error message ───────────────────────── */
+    .error-msg {
+      background: #1A0B0B;
+      border: 1px solid rgba(226, 75, 74, 0.3);
+      border-radius: 7px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #FC8585;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .error-msg.visible {
+      display: flex;
+    }
+
+    /* ── Footer ──────────────────────────────── */
+    .auth-footer {
+      text-align: center;
+      font-size: 11px;
+      color: #2E3040;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page-wrap">
+
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+          <path d="M13 2L4 6v7c0 5.5 3.8 10.2 9 11 5.2-.8 9-5.5 9-11V6L13 2Z" stroke="#378ADD" stroke-width="1.4"
+            fill="rgba(55,138,221,0.12)" />
+          <path d="M9 13l2.8 2.8 5.2-5.6" stroke="#378ADD" stroke-width="1.4" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </div>
+      <div class="brand-name">ProctorAI</div>
+      <div class="brand-tagline">AI-powered secure exam monitoring</div>
+    </div>
+
+    <!-- Auth card -->
+    <div class="auth-card">
+
+      <!-- Role selector -->
+      <div class="role-selector">
+        <button class="role-btn active-student" id="role-student" onclick="setRole('student')">
+          <div class="role-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2L1 5.5l7 3.5 7-3.5L8 2Z" stroke="#1D9E75" stroke-width="1.2" stroke-linejoin="round" />
+              <path d="M1 5.5v4c0 0 2 2.5 7 2.5s7-2.5 7-2.5v-4" stroke="#1D9E75" stroke-width="1.2"
+                stroke-linecap="round" />
+              <path d="M14 5.5v4.5" stroke="#1D9E75" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+          </div>
+          Student
+        </button>
+        <button class="role-btn" id="role-teacher" onclick="setRole('teacher')">
+          <div class="role-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="12" height="9" rx="1.5" stroke="#378ADD" stroke-width="1.2" />
+              <path d="M5 13h6M8 11v2" stroke="#378ADD" stroke-width="1.2" stroke-linecap="round" />
+              <path d="M5 6h6M5 8h3" stroke="#378ADD" stroke-width="1.1" stroke-linecap="round" />
+            </svg>
+          </div>
+          Teacher
+        </button>
+      </div>
+
+      <!-- Form body -->
+      <div class="form-body">
+
+        <div class="form-header">
+          <div id="role-badge" class="role-badge rb-student">
+            <div class="dot dot-green dot-sm"></div>
+            <span id="badge-text">Student login</span>
+          </div>
+          <div class="form-title" id="form-title">Welcome back</div>
+          <div class="form-sub" id="form-sub">Login to access your scheduled exams</div>
+        </div>
+
+        <!-- Error -->
+        <div class="error-msg" id="error-msg">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1.5L13 12H1L7 1.5Z" stroke="#FC8585" stroke-width="1.1" />
+            <path d="M7 5.5v3" stroke="#FC8585" stroke-width="1.1" stroke-linecap="round" />
+          </svg>
+          <span id="error-text">Invalid credentials. Please try again.</span>
+        </div>
+
+        <!-- Name field -->
+        <div class="field" id="name-field">
+          <label id="name-label">Full Name</label>
+          <input type="text" id="input-name" placeholder="e.g. Priya Mehta" autocomplete="name" />
+        </div>
+
+        <!-- Roll / Email field -->
+        <div class="field" id="roll-field">
+          <label id="id-label">Roll number / Student ID</label>
+          <input type="text" id="input-id" placeholder="e.g. CS2024-047" autocomplete="username" />
+          <div class="student-id-note" id="id-note">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="4.5" stroke="#3E4150" stroke-width="1" />
+              <path d="M6 5v3M6 4v.5" stroke="#3E4150" stroke-width="1" stroke-linecap="round" />
+            </svg>
+            Use the roll number assigned by your institution
+          </div>
+        </div>
+
+        <!-- Password field -->
+        <div class="field">
+          <label>Password</label>
+          <div class="pw-row">
+            <input type="password" id="input-pw" placeholder="Enter your password" autocomplete="current-password" />
+            <button class="pw-toggle" onclick="togglePw()" id="pw-eye" aria-label="Show password">
+              <svg id="eye-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <ellipse cx="8" cy="8" rx="6" ry="4" stroke="currentColor" stroke-width="1.1" />
+                <circle cx="8" cy="8" r="1.8" fill="currentColor" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Remember + Forgot -->
+        <div class="row-between">
+          <label class="remember">
+            <input type="checkbox" id="remember-me" />
+            Remember me
+          </label>
+          <a class="forgot-link" href="#" onclick="showForgot(); return false;">Forgot password?</a>
+        </div>
+
+        <!-- Exam Code (shown for student role only) -->
+        <div id="exam-code-field" style="display:none;flex-direction:column;gap:6px">
+          <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">
+            Exam Code <span style="color:var(--red)">*</span>
+          </label>
+          <input type="text" id="input-exam-code" placeholder="e.g. MATH01"
+            style="text-transform:uppercase;letter-spacing:.12em;font-weight:600;font-size:15px;text-align:center;padding:11px"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" maxlength="10" autocomplete="off" />
+          <div style="font-size:11px;color:var(--text-muted)">Enter the code provided by your teacher</div>
+        </div>
+
+        <!-- Submit -->
+        <button class="submit-btn submit-student" id="submit-btn" onclick="handleLogin()">
+          Login as Student
+        </button>
+
+        <div class="divider">or</div>
+
+        <!-- Switch to signup -->
+        <div id="signup-row" style="text-align:center;font-size:12px;color:#5A5D6B;display:none">
+          Don't have an account?
+          <a class="switch-link switch-link-blue" id="goto-signup" href="teacher-register.html">
+            Create account
+          </a>
+        </div>
+
+      </div><!-- /form-body -->
+
+      <!-- Switch role hint -->
+      <div class="switch-row">
+        <span id="switch-hint">Are you a teacher?</span>
+        <a class="switch-link switch-link-blue" id="quick-switch" onclick="setRole('teacher'); return false;" href="#">
+          Switch to teacher login</a>
+      </div>
+
+    </div><!-- /auth-card -->
+
+    <!-- Footer -->
+    <div class="auth-footer">ProctorAI &nbsp;·&nbsp; Secure exam environment &nbsp;·&nbsp; All sessions are monitored
+    </div>
+
+  </div><!-- /page-wrap -->
+
+  <script>
+    var currentRole = 'student';
+    var pwVisible = false;
+
+    // Initialize UI for default role immediately on page load
+    window.addEventListener('DOMContentLoaded', function () { setRole('student'); });
+
+    function setRole(role) {
+      currentRole = role;
+
+      var rStudent = document.getElementById('role-student');
+      var rTeacher = document.getElementById('role-teacher');
+      var badge = document.getElementById('role-badge');
+      var badgeTxt = document.getElementById('badge-text');
+      var title = document.getElementById('form-title');
+      var sub = document.getElementById('form-sub');
+      var idLabel = document.getElementById('id-label');
+      var idNote = document.getElementById('id-note');
+      var submitBtn = document.getElementById('submit-btn');
+      var gotoSignup = document.getElementById('goto-signup');
+      var switchHint = document.getElementById('switch-hint');
+      var quickSwitch = document.getElementById('quick-switch');
+      var rollField = document.getElementById('roll-field');
+      var inputId = document.getElementById('input-id');
+
+      if (role === 'student') {
+        rStudent.className = 'role-btn active-student';
+        rTeacher.className = 'role-btn';
+        badge.className = 'role-badge rb-student';
+        badgeTxt.textContent = 'Student login';
+        title.textContent = 'Welcome back';
+        sub.textContent = 'Login to access your scheduled exams';
+        idLabel.textContent = 'Roll number / Student ID';
+        var nameField = document.getElementById('name-field');
+        if (nameField) nameField.style.display = 'flex';
+
+        inputId.placeholder = 'e.g. CS2024-047';
+        idNote.style.display = 'flex';
+        submitBtn.className = 'submit-btn submit-student';
+        submitBtn.textContent = 'Login as Student';
+        gotoSignup.className = 'switch-link switch-link-green';
+        switchHint.textContent = 'Are you a teacher?';
+        quickSwitch.textContent = ' Switch to teacher login';
+        quickSwitch.onclick = function () { setRole('teacher'); return false; };
+        var regLink = document.getElementById('register-link');
+        if (regLink) regLink.style.display = 'none';
+        var signupRow = document.getElementById('signup-row');
+        if (signupRow) signupRow.style.display = 'none';
+        var ecf = document.getElementById('exam-code-field');
+        if (ecf) ecf.style.display = 'flex';
+      } else {
+        rTeacher.className = 'role-btn active-teacher';
+        rStudent.className = 'role-btn';
+        badge.className = 'role-badge rb-teacher';
+        badgeTxt.textContent = 'Teacher login';
+        title.textContent = 'Proctor dashboard';
+        sub.textContent = 'Login to manage exams and monitor sessions';
+        idLabel.textContent = 'Username';
+        var nameField = document.getElementById('name-field');
+        if (nameField) nameField.style.display = 'none';
+
+        inputId.placeholder = 'e.g. teacher_ramesh';
+        idNote.style.display = 'none';
+        submitBtn.className = 'submit-btn submit-teacher';
+        submitBtn.textContent = 'Login as Teacher';
+        gotoSignup.className = 'switch-link switch-link-blue';
+        switchHint.textContent = 'Are you a student?';
+        quickSwitch.textContent = ' Switch to student login';
+        quickSwitch.onclick = function () { setRole('student'); return false; };
+        var regLink = document.getElementById('register-link');
+        if (regLink) regLink.style.display = 'block';
+        var signupRow = document.getElementById('signup-row');
+        if (signupRow) signupRow.style.display = 'block';
+        var ecf = document.getElementById('exam-code-field');
+        if (ecf) ecf.style.display = 'none';
+      }
+
+      document.getElementById('error-msg').classList.remove('visible');
+    }
+
+    function togglePw() {
+      pwVisible = !pwVisible;
+      var inp = document.getElementById('input-pw');
+      var icon = document.getElementById('eye-icon');
+      inp.type = pwVisible ? 'text' : 'password';
+      icon.innerHTML = pwVisible
+        ? '<ellipse cx="8" cy="8" rx="6" ry="4" stroke="currentColor" stroke-width="1.1"/><line x1="3" y1="3" x2="13" y2="13" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>'
+        : '<ellipse cx="8" cy="8" rx="6" ry="4" stroke="currentColor" stroke-width="1.1"/><circle cx="8" cy="8" r="1.8" fill="currentColor"/>';
+    }
+
+    function handleLogin() {
+      var id = document.getElementById('input-id').value.trim();
+      var pw = document.getElementById('input-pw').value;
+      var errEl = document.getElementById('error-msg');
+      var errTxt = document.getElementById('error-text');
+
+      var name = document.getElementById('input-name') ? document.getElementById('input-name').value.trim() : '';
+      if (currentRole === 'student' && !name) {
+        errTxt.textContent = 'Please enter your full name.';
+        errEl.classList.add('visible');
+        return;
+      }
+
+      // Exam code validation for student
+      var examCode = '';
+      if (currentRole === 'student') {
+        examCode = (document.getElementById('input-exam-code').value || '').trim().toUpperCase();
+        if (!examCode) {
+          errTxt.textContent = 'Please enter your exam code.';
+          errEl.classList.add('visible');
+          return;
+        }
+      }
+
+      if (!id || !pw) {
+        errTxt.textContent = 'Please fill in all fields.';
+        errEl.classList.add('visible');
+        return;
+      }
+      if (pw.length < 6) {
+        errTxt.textContent = 'Password must be at least 6 characters.';
+        errEl.classList.add('visible');
+        return;
+      }
+
+      if (currentRole === 'student') {
+        localStorage.setItem('student_name', name);
+        localStorage.setItem('student_roll', id);   // Roll number / Student ID
+        localStorage.setItem('exam_code', examCode);
+        if (window.electronAPI && window.electronAPI.setStudentId) {
+          window.electronAPI.setStudentId(id);
+        }
+      }
+      localStorage.setItem('current_role', currentRole);
+
+      errEl.classList.remove('visible');
+
+      var btn = document.getElementById('submit-btn');
+      btn.textContent = 'Verifying…';
+      btn.style.opacity = '0.6';
+      btn.disabled = true;
+
+      // For students: call requestMediaPermissions() to trigger the macOS system
+      // dialog so it appears NOW (on the login page, before kiosk lockdown).
+      // We always proceed regardless of the result — getUserMedia() in the
+      // exam room is the real enforcement point and will show a clear error
+      // if the user has permanently blocked access at the system level.
+      (async function () {
+        if (currentRole === 'student') {
+          btn.textContent = 'Verifying exam code…';
+          // Verify exam code exists and is active
+          try {
+            const codeResp = await fetch('http://localhost:4000/api/student/exam/' + examCode);
+            const codeData = await codeResp.json();
+            if (!codeResp.ok) {
+              // Backend returns specific message — show it clearly
+              var errMsg = codeData.error || 'Invalid exam code.';
+              // Distinguish "code wrong" vs "exam not ready"
+              if (errMsg.toLowerCase().includes('not available') || errMsg.toLowerCase().includes('not found')) {
+                errMsg = '❌ Exam code "' + examCode + '" is not active yet. Please check with your teacher that the exam has been published.';
+              }
+              errTxt.textContent = errMsg;
+              errEl.classList.add('visible');
+              btn.textContent = 'Login as Student';
+              btn.style.opacity = '1';
+              btn.disabled = false;
+              return;
+            }
+            // Store exam data for exam-room to use
+            localStorage.setItem('exam_data', JSON.stringify(codeData));
+            localStorage.setItem('exam_code', examCode);
+            localStorage.setItem('exam_id', codeData.id);  // real UUID
+            // Tell Electron main.js the real exam ID so violations go to the correct exam
+            if (window.electronAPI && window.electronAPI.setExamId) {
+              window.electronAPI.setExamId(codeData.id);
+            }
+          } catch (codeErr) {
+            errTxt.textContent = 'Cannot reach server. Make sure the backend is running.';
+            errEl.classList.add('visible');
+            btn.textContent = 'Login as Student';
+            btn.style.opacity = '1';
+            btn.disabled = false;
+            return;
+          }
+          btn.textContent = 'Starting proctoring…';
+          try {
+            if (window.electronAPI && window.electronAPI.requestMediaPermissions) {
+              await window.electronAPI.requestMediaPermissions();
+            }
+          } catch (permErr) {
+            console.warn('[Login] Permission hint error:', permErr);
+          }
+          window.location.href = 'instructions.html';
+        } else {
+          // Teacher — authenticate against backend
+          btn.textContent = 'Authenticating…';
+          try {
+            const resp = await fetch('http://localhost:4000/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username: id, password: pw })
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+              errTxt.textContent = data.error || 'Invalid credentials. Please try again.';
+              errEl.classList.add('visible');
+              btn.textContent = 'Login as Teacher';
+              btn.style.opacity = '1';
+              btn.disabled = false;
+              return;
+            }
+            localStorage.setItem('teacher_token', data.token);
+            localStorage.setItem('teacher_user', JSON.stringify(data.user));
+            window.location.href = 'teacher-dashboard.html';
+          } catch (netErr) {
+            errTxt.textContent = 'Cannot reach server. Make sure the backend is running.';
+            errEl.classList.add('visible');
+            btn.textContent = 'Login as Teacher';
+            btn.style.opacity = '1';
+            btn.disabled = false;
+          }
+        }
+      })();
+    }
+
+    function showForgot() {
+      var errEl = document.getElementById('error-msg');
+      var errTxt = document.getElementById('error-text');
+      errTxt.textContent = 'Password reset link will be sent to your registered email.';
+      errEl.style.background = '#081526';
+      errEl.style.borderColor = 'rgba(55,138,221,0.3)';
+      errEl.querySelector('path').setAttribute('stroke', '#7BB8E8');
+      errEl.style.color = '#7BB8E8';
+      errEl.classList.add('visible');
+    }
+
+    // Allow Enter key to submit
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') handleLogin();
+    });
+
+  </script>
+
+  <!-- Register link (teacher only) -->
+  <div id="register-link" style="display:none;text-align:center;padding:14px 0;font-size:12px;color:#5A5D6B">
+    No teacher account? <a href="teacher-register.html" style="color:#7BB8E8;text-decoration:none"
+      onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Register
+      here</a>
+  </div>
+
+</body>
+
+</html>

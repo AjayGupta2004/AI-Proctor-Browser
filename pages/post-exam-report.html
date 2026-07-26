@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProctorAI — Post-Exam Report</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .rp-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      flex: 1;
+    }
+
+    /* ── Section ─────────────────────────────── */
+    .section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .sec-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Profile ─────────────────────────────── */
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: var(--blue-bg);
+      border: 1px solid var(--blue-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--blue);
+      flex-shrink: 0;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .stat-tile {
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+    }
+
+    .st-num {
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .st-lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+
+    .verdict-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #0D1808;
+      border: 1px solid rgba(29, 158, 117, 0.2);
+      border-radius: var(--radius-md);
+      margin-top: 14px;
+    }
+
+    .verdict-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #0A1F15;
+      border: 1px solid rgba(29, 158, 117, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Timeline ────────────────────────────── */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tl-item {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .tl-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 32px;
+      flex-shrink: 0;
+    }
+
+    .tl-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1.5px solid;
+      margin-top: 4px;
+    }
+
+    .tl-connector {
+      width: 1.5px;
+      flex: 1;
+      margin: 3px 0;
+      min-height: 10px;
+    }
+
+    .tl-content {
+      flex: 1;
+      padding: 4px 0 16px 10px;
+    }
+
+    .tl-time {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .tl-title {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .tl-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      line-height: 1.5;
+    }
+
+    .tl-red .tl-dot {
+      background: #E24B4A;
+      border-color: #E24B4A;
+    }
+
+    .tl-red .tl-connector {
+      background: rgba(226, 75, 74, 0.2);
+    }
+
+    .tl-red .tl-title {
+      color: #FC8585;
+    }
+
+    .tl-amber .tl-dot {
+      background: #EF9F27;
+      border-color: #EF9F27;
+    }
+
+    .tl-amber .tl-connector {
+      background: rgba(239, 159, 39, 0.2);
+    }
+
+    .tl-amber .tl-title {
+      color: #FAC775;
+    }
+
+    .tl-green .tl-dot {
+      background: #1D9E75;
+      border-color: #1D9E75;
+    }
+
+    .tl-green .tl-connector {
+      background: rgba(29, 158, 117, 0.15);
+    }
+
+    .tl-green .tl-title {
+      color: #5DCAA5;
+    }
+
+    .tl-gray .tl-dot {
+      background: #3A3D4A;
+      border-color: #3A3D4A;
+    }
+
+    .tl-gray .tl-connector {
+      background: rgba(58, 61, 74, 0.3);
+    }
+
+    .tl-gray .tl-title {
+      color: var(--text-muted);
+    }
+
+    /* ── Behaviour analysis ─────────────────── */
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .score-item {
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+    }
+
+    .sc-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .sc-bar {
+      height: 4px;
+      background: var(--bg-raised);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .sc-fill {
+      height: 100%;
+      border-radius: 2px;
+    }
+
+    .ai-summary {
+      font-size: 12px;
+      color: #8A8D9A;
+      line-height: 1.75;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      border-left: 2px solid rgba(55, 138, 221, 0.4);
+    }
+
+    .ai-tag {
+      font-size: 10px;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 6px;
+    }
+
+    /* ── Action strip ────────────────────────── */
+    .action-strip {
+      display: flex;
+      gap: 8px;
+      padding: 13px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .act {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-md);
+      padding: 9px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+      font-family: inherit;
+    }
+
+    .act:hover {
+      background: var(--bg-raised);
+      color: var(--text-primary);
+    }
+
+    @media print {
+
+      .action-strip,
+      .topbar {
+        display: none !important;
+      }
+
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: #0A0C11;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <rect x="2" y="2" width="14" height="14" rx="3" stroke="#378ADD" stroke-width="1.2"
+        fill="rgba(55,138,221,0.08)" />
+      <path d="M5 6h8M5 9h6M5 12h4" stroke="#378ADD" stroke-width="1.1" stroke-linecap="round" />
+    </svg>
+    <span class="topbar-title">Post-exam report — AI analysis complete</span>
+    <div class="spacer"></div>
+    <div class="pill pill-blue" id="gen-time">Generated --:--:--</div>
+    <div class="pill pill-amber">Needs review</div>
+    <button class="btn" id="top-dash-btn" onclick="window.location.href='proctor-dashboard.html'"
+      style="margin-left:8px">← Dashboard</button>
+  </div>
+
+  <!-- Report body -->
+  <div class="rp-body">
+
+    <!-- Candidate profile -->
+    <div class="section">
+      <div class="card-head">
+        <div class="sec-icon" style="background:var(--blue-bg);border:1px solid var(--blue-border)">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="5" r="3" stroke="#378ADD" stroke-width="1.1" />
+            <path d="M2 12c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="#378ADD" stroke-width="1.1" stroke-linecap="round" />
+          </svg>
+        </div>
+        <span class="card-title">Candidate profile</span>
+        <div class="pill pill-amber" id="profile-risk-badge">Medium risk</div>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="avatar" id="student-avatar-initials">S</div>
+          <div>
+            <div style="font-size:15px;font-weight:500;color:var(--text-primary)" id="student-name">Student</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="profile-roll-line">Roll: — </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="profile-exam-line">Exam: —</div>
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-tile">
+            <div class="st-num" id="metric-answered" style="color:var(--text-primary)">0</div>
+            <div class="st-lbl">Questions attempted</div>
+          </div>
+          <div class="stat-tile">
+            <div class="st-num" id="metric-correct" style="color:#5DCAA5">0</div>
+            <div class="st-lbl">Correct answers</div>
+          </div>
+          <div class="stat-tile">
+            <div class="st-num" id="metric-wrong" style="color:#FC8585">0</div>
+            <div class="st-lbl">Wrong answers</div>
+          </div>
+          <div class="stat-tile">
+            <div class="st-num" id="metric-score" style="color:#7BB8E8">0</div>
+            <div class="st-lbl">Score (marks)</div>
+          </div>
+          <div class="stat-tile" id="stat-tile-risk">
+            <div class="st-num" id="metric-risk" style="color:#FAC775">—</div>
+            <div class="st-lbl">Final risk score</div>
+          </div>
+          <div class="stat-tile" id="stat-tile-violations">
+            <div class="st-num" id="metric-violations" style="color:#FC8585">0</div>
+            <div class="st-lbl">Violations flagged</div>
+          </div>
+          <div class="stat-tile">
+            <div class="st-num" id="metric-time" style="color:#5DCAA5">—</div>
+            <div class="st-lbl">Active exam time</div>
+          </div>
+        </div>
+        <div class="verdict-row" id="verdict-row">
+          <div class="verdict-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 8l3.5 3.5L13 5" stroke="#1D9E75" stroke-width="1.4" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.55;flex:1" id="metric-verdict-desc">
+            AI analysis indicates <strong style="color:var(--text-primary)">likely legitimate</strong> with moderate
+            anomalies. Behaviour consistent with accidental navigation. Manual proctor review recommended before result
+            release.
+          </div>
+          <div style="font-size:14px;font-weight:500;color:#5DCAA5;white-space:nowrap" id="metric-verdict-title">Likely
+            legit</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Incident timeline -->
+    <div class="section" id="incident-section">
+      <div class="card-head">
+        <div class="sec-icon" style="background:#1A0D08;border:1px solid rgba(239,159,39,0.2)">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="5.5" stroke="#EF9F27" stroke-width="1.1" />
+            <path d="M7 4v3.5l2 1.5" stroke="#EF9F27" stroke-width="1.1" stroke-linecap="round" />
+          </svg>
+        </div>
+        <span class="card-title">Incident timeline</span>
+        <span style="font-size:11px;color:var(--text-muted)">3 incidents · 2 categories</span>
+      </div>
+      <div class="card-body">
+        <div class="timeline" id="incident-timeline">
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Analysis -->
+    <div class="section" id="analysis-section">
+      <div class="card-head">
+        <div class="sec-icon" style="background:#0A1520;border:1px solid rgba(55,138,221,0.2)">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 11L5 5l3 4 2-3 2 5" stroke="#378ADD" stroke-width="1.1" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </div>
+        <span class="card-title">Behaviour analysis</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:12px">
+        <div class="score-grid">
+          <div class="score-item">
+            <div class="sc-lbl"><span>Face presence</span><strong style="color:#5DCAA5">96%</strong></div>
+            <div class="sc-bar">
+              <div class="sc-fill" style="width:96%;background:#1D9E75"></div>
+            </div>
+          </div>
+          <div class="score-item">
+            <div class="sc-lbl"><span>Gaze on screen</span><strong style="color:#5DCAA5">91%</strong></div>
+            <div class="sc-bar">
+              <div class="sc-fill" style="width:91%;background:#1D9E75"></div>
+            </div>
+          </div>
+          <div class="score-item">
+            <div class="sc-lbl"><span>Tab focus</span><strong style="color:#FAC775">84%</strong></div>
+            <div class="sc-bar">
+              <div class="sc-fill" style="width:84%;background:#EF9F27"></div>
+            </div>
+          </div>
+          <div class="score-item">
+            <div class="sc-lbl"><span>Audio — clean</span><strong style="color:#5DCAA5">99%</strong></div>
+            <div class="sc-bar">
+              <div class="sc-fill" style="width:99%;background:#1D9E75"></div>
+            </div>
+          </div>
+        </div>
+        <div class="ai-summary">
+          <div class="ai-tag">AI assessment</div>
+          Candidate maintained consistent face presence (96%) and audio environment was clean throughout. Two tab
+          switches occurred — both brief, with the second showing a generic search engine URL rather than a
+          subject-specific resource. Gaze deviation at Q14 lasted 4 seconds within acceptable thresholds. Overall
+          behavioural pattern does not strongly indicate coordinated malpractice. Confidence score for legitimate exam:
+          72%. Recommendation: release result after proctor spot-check of Q19 window capture screenshot.
+        </div>
+      </div>
+      <div class="action-strip">
+        <button class="act" id="bottom-dash-btn" style="color:#7BB8E8;border-color:rgba(55,138,221,0.3)"
+          onclick="window.location.href='proctor-dashboard.html'">← Back to dashboard</button>
+        <button class="act" onclick="window.print()">Download PDF</button>
+
+      </div>
+    </div>
+  </div><!-- /rp-body -->
+
+  <script>
+    // Hide AI Analysis and Behavior lists from the student (keep them secret for the teacher)!
+    const currentRole = localStorage.getItem('current_role') || 'student';
+    if (currentRole === 'student') {
+      const hiddenIds = [
+        'stat-tile-risk',
+        'stat-tile-violations',
+        'verdict-row',
+        'incident-section',
+        'analysis-section',
+        'profile-risk-badge',
+        'top-dash-btn',
+        'bottom-dash-btn'
+      ];
+      hiddenIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+    }
+
+    var n = new Date();
+    var p = function (x) { return (x < 10 ? '0' : '') + x; };
+    document.getElementById('gen-time').textContent = 'Generated ' + p(n.getHours()) + ':' + p(n.getMinutes()) + ':' + p(n.getSeconds());
+
+    // Load actual dynamic data from the recently concluded exam
+    var finalViolations = parseInt(localStorage.getItem('final_violations') || 0);
+    var finalName = localStorage.getItem('final_student_name') || localStorage.getItem('student_name') || 'Student';
+    var finalRoll = localStorage.getItem('final_student_roll') || 'N/A';
+    var finalExamTitle = localStorage.getItem('final_exam_title') || 'Exam';
+    var finalDuration = localStorage.getItem('final_exam_duration') || '—';
+    var finalSubject = localStorage.getItem('final_exam_subject') || '';
+    var finalScore = localStorage.getItem('final_score') || 0;
+    var finalTotal = localStorage.getItem('final_total') || 0;
+    var today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    document.getElementById('student-name').textContent = finalName;
+    var initials = finalName.split(' ').map(function (w) { return w.charAt(0); }).join('').toUpperCase().substring(0, 2);
+    document.getElementById('student-avatar-initials').textContent = initials || 'S';
+
+    // Build profile lines dynamically
+    var rollLine = 'Roll: ' + finalRoll;
+    if (finalSubject) rollLine += '  ·  ' + finalSubject;
+    document.getElementById('profile-roll-line').textContent = rollLine;
+    document.getElementById('profile-exam-line').textContent = 'Exam: ' + finalExamTitle + '  ·  Duration: ' + finalDuration + ' min  ·  Date: ' + today;
+
+    var finalRisk = localStorage.getItem('final_risk') || 0;
+    var finalAnswered = localStorage.getItem('final_answered') || 0;
+    var finalCorrect = localStorage.getItem('final_correct') || 0;
+    var finalWrong = localStorage.getItem('final_wrong') || 0;
+    var finalTimeSecs = parseInt(localStorage.getItem('final_time') || 0, 10);
+
+    document.getElementById('metric-violations').textContent = finalViolations;
+    document.getElementById('metric-answered').textContent = finalAnswered;
+    document.getElementById('metric-correct').textContent = finalCorrect;
+    document.getElementById('metric-wrong').textContent = finalWrong;
+    document.getElementById('metric-score').textContent = finalScore + ' / ' + finalTotal;
+
+    var mins = Math.floor(finalTimeSecs / 60);
+    var secs = finalTimeSecs % 60;
+    document.getElementById('metric-time').textContent = p(mins) + ':' + p(secs);
+
+    var mr = document.getElementById('metric-risk');
+    mr.textContent = finalRisk + '%';
+
+    if (finalRisk < 30) {
+      mr.style.color = '#5DCAA5';
+      document.getElementById('metric-verdict-title').textContent = 'Legit / No Risk';
+      document.getElementById('metric-verdict-title').style.color = '#5DCAA5';
+      document.getElementById('metric-verdict-desc').innerHTML = 'AI analysis indicates <strong style="color:var(--text-primary)">legitimate session</strong>. No significant anomalies were detected. Session is clear for automatic grading.';
+    } else if (finalRisk < 65) {
+      mr.style.color = '#FAC775';
+      document.getElementById('metric-verdict-title').textContent = 'Moderate Anomalies';
+      document.getElementById('metric-verdict-title').style.color = '#FAC775';
+      document.getElementById('metric-verdict-desc').innerHTML = `AI analysis recorded ${finalViolations} violations. Manual proctor review recommended before result release.`;
+    } else {
+      mr.style.color = '#FC8585';
+      document.getElementById('metric-verdict-title').textContent = 'High Cheating Risk';
+      document.getElementById('metric-verdict-title').style.color = '#FC8585';
+      document.getElementById('metric-verdict-desc').innerHTML = `AI analysis recorded ${finalViolations} violations with a critical risk score. Session flagged for immediate faculty investigation.`;
+    }
+
+    // Render incident timeline
+    var rawTimeline = localStorage.getItem('final_timeline');
+    var timelineEvents = [];
+    if (rawTimeline) {
+      try {
+        timelineEvents = JSON.parse(rawTimeline);
+      } catch (e) { }
+    }
+
+    var tlContainer = document.getElementById('incident-timeline');
+
+    if (timelineEvents.length === 0) {
+      tlContainer.innerHTML = `
+      <div class="tl-item tl-green">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-connector" style="display:none"></div></div>
+        <div class="tl-content"><div class="tl-time">Session timeline</div><div class="tl-title">Perfect Session</div><div class="tl-desc">No violations or incidents were recorded during this exam session.</div></div>
+      </div>
+    `;
+    } else {
+      var tlHtml = '';
+      timelineEvents.forEach(function (ev, index) {
+        var colorClass = ev.severity === 'critical' ? 'tl-red' : 'tl-amber';
+        var hideConnector = index === timelineEvents.length - 1 ? 'display:none' : '';
+        tlHtml += `
+      <div class="tl-item ${colorClass}">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-connector" style="${hideConnector}"></div></div>
+        <div class="tl-content"><div class="tl-time">${ev.time} remaining — Q${ev.q}</div><div class="tl-title">${ev.type}</div><div class="tl-desc">${ev.desc}</div></div>
+      </div>
+      `;
+      });
+      tlContainer.innerHTML = tlHtml;
+    }
+  </script>
+</body>
+
+</html>

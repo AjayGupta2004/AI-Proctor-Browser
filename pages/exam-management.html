@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProctorAI — Exam Management</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar (same as dashboard) */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: #0D0F16;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 14px 0;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+
+    .sidebar-logo-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #0F1D2E;
+      border: 1px solid rgba(55, 138, 221, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .sidebar-logo-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .nav-section {
+      padding: 6px 12px 2px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-hint);
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      margin: 1px 8px;
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+      border: none;
+      background: transparent;
+      width: calc(100% - 16px);
+      text-align: left;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-raised);
+      color: var(--text-secondary);
+    }
+
+    .nav-item.active {
+      background: var(--blue-bg);
+      color: #7BB8E8;
+      border: 1px solid rgba(55, 138, 221, .2);
+    }
+
+    .nav-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #185FA5, #0F3520);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #E2E4EC;
+      flex-shrink: 0;
+    }
+
+    .user-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-role {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .logout-btn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      background: transparent;
+      border: 1px solid var(--border-md);
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+
+    .logout-btn:hover {
+      background: var(--red-bg);
+      border-color: var(--red-border);
+      color: #FC8585;
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      padding: 20px 24px 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+    }
+
+    .page-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .page-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Filter bar */
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border-md);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+
+    .filter-btn:hover {
+      background: var(--bg-raised);
+      color: var(--text-secondary);
+    }
+
+    .filter-btn.active {
+      background: var(--blue-bg);
+      border-color: rgba(55, 138, 221, .4);
+      color: #7BB8E8;
+    }
+
+    /* Exam cards */
+    .exam-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      transition: border-color .15s;
+    }
+
+    .exam-card:hover {
+      border-color: var(--border-md);
+    }
+
+    .exam-card.status-active {
+      border-left: 3px solid var(--green);
+    }
+
+    .exam-card.status-published {
+      border-left: 3px solid var(--blue);
+    }
+
+    .exam-card.status-ended {
+      border-left: 3px solid var(--amber);
+    }
+
+    .exam-card.status-draft {
+      border-left: 3px solid rgba(255, 255, 255, .1);
+    }
+
+    .ec-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .ec-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .ec-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      max-width: 600px;
+    }
+
+    .ec-meta {
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ec-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .ec-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+
+    .sb-draft {
+      background: #111420;
+      border-color: rgba(255, 255, 255, .12);
+      color: var(--text-muted);
+    }
+
+    .sb-published {
+      background: var(--blue-bg);
+      border-color: rgba(55, 138, 221, .3);
+      color: #7BB8E8;
+    }
+
+    .sb-active {
+      background: var(--green-bg);
+      border-color: rgba(29, 158, 117, .35);
+      color: #5DCAA5;
+    }
+
+    .sb-ended {
+      background: var(--amber-bg);
+      border-color: rgba(239, 159, 39, .3);
+      color: #FAC775;
+    }
+
+    /* Delete confirm modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 9, 14, .85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 900;
+    }
+
+    .modal-backdrop.hidden {
+      display: none;
+    }
+
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-xl);
+      width: 400px;
+      overflow: hidden;
+    }
+
+    .modal-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 18px 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .modal-foot {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .empty-state {
+      padding: 48px;
+      text-align: center;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      opacity: .4;
+    }
+
+    .empty-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .spinner-wrap {
+      padding: 48px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border-md);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-lg);
+      padding: 12px 18px;
+      font-size: 13px;
+      color: var(--text-primary);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+      max-width: 320px;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #toast.toast-err {
+      border-color: var(--red-border);
+      color: #FC8585;
+    }
+
+    #toast.toast-ok {
+      border-color: var(--green-border);
+      color: #5DCAA5;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+      <path d="M11 2L4 5v6c0 4.4 3 8.2 7 9 4-.8 7-4.6 7-9V5L11 2Z" stroke="#378ADD" stroke-width="1.2"
+        fill="rgba(55,138,221,0.1)" />
+      <path d="M8 11l2 2 4-4" stroke="#378ADD" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+    <span class="topbar-title">ProctorAI — Exam Management</span>
+    <div class="spacer"></div>
+    <div class="pill pill-blue">
+      <div class="dot dot-blue dot-sm"></div><span id="topbar-user">Teacher</span>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+            <path d="M11 2L4 5v6c0 4.4 3 8.2 7 9 4-.8 7-4.6 7-9V5L11 2Z" stroke="#378ADD" stroke-width="1.2"
+              fill="rgba(55,138,221,0.1)" />
+          </svg></div>
+        <div>
+          <div class="sidebar-logo-text">ProctorAI</div>
+          <div class="sidebar-logo-sub">Teacher Console</div>
+        </div>
+      </div>
+      <div class="nav-section">Main</div>
+      <a href="teacher-dashboard.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+        </svg>Dashboard</a>
+      <a href="exam-management.html" class="nav-item active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="12" height="12" rx="2" stroke="#378ADD" stroke-width="1.2" />
+          <path d="M5 6h6M5 9h4" stroke="#378ADD" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Exam Management</a>
+      <a href="create-exam.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" />
+          <path d="M8 5v6M5 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Create Exam</a>
+      <div class="nav-section" style="margin-top:8px">Monitoring</div>
+      <a href="live-monitoring.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2" />
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 2" />
+        </svg>Live Monitoring</a>
+      <a href="exam-results.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <path d="M2 12V8M6 12V5M10 12V7M14 12V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Results & Reports</a>
+      <a href="student-records.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2" />
+          <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        </svg>Student Records</a>
+      <div class="sidebar-bottom">
+        <div class="user-chip">
+          <div class="user-avatar" id="user-avatar">T</div>
+          <div>
+            <div class="user-name" id="user-name">Teacher</div>
+            <div class="user-role">Teacher</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Sign out</button>
+      </div>
+    </nav>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <div class="page-title">Exam Management</div>
+            <div class="page-sub" id="exam-count">Loading exams…</div>
+          </div>
+          <button class="btn btn-primary" onclick="window.location.href='create-exam.html'">+ New Exam</button>
+        </div>
+      </div>
+      <div class="content">
+        <!-- Filter -->
+        <div class="filter-bar">
+          <button class="filter-btn active" id="fb-all" onclick="setFilter('')">All</button>
+          <button class="filter-btn" id="fb-draft" onclick="setFilter('draft')">Draft</button>
+          <button class="filter-btn" id="fb-published" onclick="setFilter('published')">Published</button>
+          <button class="filter-btn" id="fb-active" onclick="setFilter('active')">Active</button>
+          <button class="filter-btn" id="fb-ended" onclick="setFilter('ended')">Ended</button>
+        </div>
+
+        <!-- List -->
+        <div id="loading-wrap" class="spinner-wrap">
+          <div class="spinner"></div>
+        </div>
+        <div id="exams-list" style="display:flex;flex-direction:column;gap:10px;display:none"></div>
+        <div id="empty-state" class="empty-state" style="display:none">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">No exams found</div>
+          <div class="empty-sub" id="empty-sub">Create your first exam to get started.</div>
+          <button class="btn btn-primary" id="empty-cta" style="margin-top:8px"
+            onclick="window.location.href='create-exam.html'">+ Create Exam</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete modal -->
+  <div class="modal-backdrop hidden" id="del-modal">
+    <div class="modal-box">
+      <div class="modal-head"><svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 5h12M7 5V4a1 1 0 012 0v1M8 8v5M10 8v5M4 5l1 10h8l1-10" stroke="#E24B4A" stroke-width="1.2"
+            stroke-linecap="round" stroke-linejoin="round" />
+        </svg><span class="modal-title">Delete Exam</span></div>
+      <div class="modal-body">Are you sure you want to delete <strong id="del-exam-name">this exam</strong>? All
+        questions will be permanently removed. This cannot be undone.</div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmDelete()">Delete Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    var token = localStorage.getItem('teacher_token');
+    var user = null;
+    try { user = JSON.parse(localStorage.getItem('teacher_user') || 'null'); } catch (_) { }
+    if (!token || !user) { window.location.href = 'login.html'; }
+    document.getElementById('topbar-user').textContent = user ? user.fullName : 'Teacher';
+    document.getElementById('user-name').textContent = user ? user.fullName : 'Teacher';
+    document.getElementById('user-avatar').textContent = user ? user.fullName.charAt(0).toUpperCase() : 'T';
+
+    var BASE = 'http://localhost:4000';
+    var currentFilter = '';
+    var allExams = [];
+    var deleteTargetId = null;
+
+    function api(path, opts) {
+      return fetch(BASE + path, Object.assign({ headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } }, opts || {})).then(function (r) { return r.json(); });
+    }
+
+    var toastTimer = null;
+    function showToast(msg, type) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'show ' + (type === 'error' ? 'toast-err' : 'toast-ok');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { t.className = ''; }, 3000);
+    }
+
+    function statusBadge(status) {
+      var map = { draft: 'sb-draft', published: 'sb-published', active: 'sb-active', ended: 'sb-ended' };
+      var dot = { draft: 'dot-amber', published: 'dot-blue', active: 'dot-green', ended: 'dot-amber' };
+      return '<span class="status-badge ' + (map[status] || 'sb-draft') + '"><span class="dot ' + (dot[status] || 'dot-amber') + ' dot-sm' + (status === 'active' ? ' pulse' : '') + '"></span>' + status.charAt(0).toUpperCase() + status.slice(1) + '</span>';
+    }
+
+    function escHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      document.querySelectorAll('.filter-btn').forEach(function (b) { b.classList.remove('active'); });
+      document.getElementById('fb-' + (f || 'all')).classList.add('active');
+      renderExams();
+    }
+
+    function renderExams() {
+      var filtered = currentFilter ? allExams.filter(function (e) { return e.status === currentFilter; }) : allExams;
+      var list = document.getElementById('exams-list');
+      var empty = document.getElementById('empty-state');
+      list.style.display = 'none'; empty.style.display = 'none';
+
+      if (filtered.length === 0) {
+        empty.style.display = 'flex';
+        document.getElementById('empty-sub').textContent = currentFilter ? 'No ' + currentFilter + ' exams found.' : 'Create your first exam to get started.';
+        document.getElementById('empty-cta').style.display = currentFilter ? 'none' : 'inline-flex';
+        return;
+      }
+
+      list.innerHTML = '';
+      filtered.forEach(function (exam) {
+        var card = document.createElement('div');
+        card.className = 'exam-card status-' + exam.status;
+
+        var primaryBtn = '';
+        if (exam.status === 'draft') {
+          primaryBtn = '<button class="btn btn-primary" style="font-size:12px" onclick="publishExam(\'' + exam.id + '\')">Publish</button>';
+        } else if (exam.status === 'published') {
+          primaryBtn = '<button class="btn btn-success" style="font-size:12px" onclick="activateExam(\'' + exam.id + '\')">Activate</button>';
+        } else if (exam.status === 'active') {
+          primaryBtn = '<a href="live-monitoring.html?examId=' + exam.id + '" class="btn" style="font-size:12px;color:#5DCAA5;border-color:rgba(29,158,117,.4)">🔴 Live Monitor</a>';
+          primaryBtn += '<button class="btn btn-danger" style="font-size:12px" onclick="endExam(\'' + exam.id + '\')">End Exam</button>';
+        }
+
+        card.innerHTML =
+          '<div class="ec-top">' +
+          '<div>' +
+          '<div style="display:flex;align-items:center;gap:8px">' +
+          '<div class="ec-title">' + escHtml(exam.title) + '</div>' +
+          statusBadge(exam.status) +
+          '</div>' +
+          (exam.description ? '<div class="ec-desc">' + escHtml(exam.description) + '</div>' : '') +
+          '</div>' +
+          '<div class="ec-actions">' +
+          primaryBtn +
+          '<a href="edit-exam.html?id=' + exam.id + '" class="btn" style="font-size:12px">Edit</a>' +
+          '<a href="exam-results.html?examId=' + exam.id + '" class="btn" style="font-size:12px">📊 Results</a>' +
+          '<button class="btn btn-danger" style="font-size:12px;padding:7px 10px" onclick="openDeleteModal(\'' + exam.id + '\',\'' + escHtml(exam.title) + '\')">🗑</button>' +
+          '</div>' +
+          '</div>' +
+          '<div class="ec-meta">' +
+          (exam.exam_code ? '<div class="ec-meta-item" style="color:#5DCAA5;font-weight:600"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="5" width="8" height="5" rx="1" stroke="#5DCAA5" stroke-width="1"/><path d="M4 5V3.5a2 2 0 014 0V5" stroke="#5DCAA5" stroke-width="1" stroke-linecap="round"/></svg><span style="font-family:monospace;letter-spacing:.08em">' + escHtml(exam.exam_code) + '</span></div>' : '') +
+          (exam.subject ? '<div class="ec-meta-item"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 9V3l4-2 4 2v6l-4 2-4-2Z" stroke="#5A5D6B" stroke-width="1" stroke-linejoin="round"/></svg>' + escHtml(exam.subject) + '</div>' : '') +
+          '<div class="ec-meta-item"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="#5A5D6B" stroke-width="1"/><path d="M6 4v2.5l1.5 1" stroke="#5A5D6B" stroke-width="1" stroke-linecap="round"/></svg>' + exam.duration + ' min</div>' +
+          '<div class="ec-meta-item"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1.5" y="1.5" width="9" height="9" rx="1" stroke="#5A5D6B" stroke-width="1"/><path d="M4 5h4M4 7h2" stroke="#5A5D6B" stroke-width="1" stroke-linecap="round"/></svg>' + exam.question_count + ' questions</div>' +
+          '<div class="ec-meta-item"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10V6l4-3 4 3v4" stroke="#5A5D6B" stroke-width="1" stroke-linejoin="round"/></svg>' + exam.total_marks + ' marks</div>' +
+          '<div class="ec-meta-item"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="4" r="2" stroke="#5A5D6B" stroke-width="1"/><path d="M1 10c0-2 1.8-3.5 4-3.5s4 1.5 4 3.5" stroke="#5A5D6B" stroke-width="1" stroke-linecap="round"/></svg>' + exam.attempt_count + ' attempts</div>' +
+          (exam.start_time ? '<div class="ec-meta-item" style="color:#5DCAA5">Started: ' + new Date(exam.start_time).toLocaleString() + '</div>' : '') +
+          '</div>';
+        list.appendChild(card);
+      });
+
+      list.style.display = 'flex';
+    }
+
+    function loadExams() {
+      document.getElementById('loading-wrap').style.display = 'flex';
+      api('/api/teacher/exams').then(function (data) {
+        document.getElementById('loading-wrap').style.display = 'none';
+        if (!Array.isArray(data)) { showToast('Failed to load exams.', 'error'); return; }
+        allExams = data;
+        document.getElementById('exam-count').textContent = data.length + ' exam(s)';
+        renderExams();
+      }).catch(function () { document.getElementById('loading-wrap').style.display = 'none'; showToast('Backend unreachable.', 'error'); });
+    }
+
+    function publishExam(id) {
+      api('/api/teacher/exams/' + id + '/publish', { method: 'PUT' }).then(function (r) {
+        if (r.error) { showToast(r.error, 'error'); return; }
+        showToast('Exam published!', 'ok'); loadExams();
+      }).catch(function () { showToast('Action failed', 'error'); });
+    }
+
+    function activateExam(id) {
+      api('/api/teacher/exams/' + id + '/activate', { method: 'PUT' }).then(function (r) {
+        if (r.error) { showToast(r.error, 'error'); return; }
+        showToast('Exam is now LIVE! Students can join.', 'ok'); loadExams();
+      }).catch(function () { showToast('Action failed', 'error'); });
+    }
+
+    function endExam(id) {
+      if (!confirm('End this exam? Students currently taking it will not be able to continue.')) return;
+      api('/api/teacher/exams/' + id + '/end', { method: 'PUT' }).then(function (r) {
+        if (r.error) { showToast(r.error, 'error'); return; }
+        showToast('Exam ended.', 'ok'); loadExams();
+      }).catch(function () { showToast('Action failed', 'error'); });
+    }
+
+    function openDeleteModal(id, name) {
+      deleteTargetId = id;
+      document.getElementById('del-exam-name').textContent = name;
+      document.getElementById('del-modal').classList.remove('hidden');
+    }
+    function closeDeleteModal() { document.getElementById('del-modal').classList.add('hidden'); deleteTargetId = null; }
+    function confirmDelete() {
+      if (!deleteTargetId) return;
+      api('/api/teacher/exams/' + deleteTargetId, { method: 'DELETE' }).then(function (r) {
+        if (r.error) { showToast(r.error, 'error'); closeDeleteModal(); return; }
+        showToast('Exam deleted.', 'ok'); closeDeleteModal(); loadExams();
+      }).catch(function () { showToast('Delete failed', 'error'); closeDeleteModal(); });
+    }
+
+    function logout() {
+      fetch(BASE + '/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).catch(function () { }).finally(function () {
+        localStorage.removeItem('teacher_token'); localStorage.removeItem('teacher_user');
+        window.location.href = 'login.html';
+      });
+    }
+
+    loadExams();
+  </script>
+</body>
+
+</html>
