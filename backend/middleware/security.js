@@ -36,11 +36,11 @@ const globalLimiter = createLimiter({
   message: { error: 'Too many requests. Please try again later.' },
 })
 
-// Auth endpoints: 10 requests per 15 minutes
+// Auth endpoints: 10 requests per 30 seconds
 const authLimiter = createLimiter({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 30 * 1000,
   max: 10,
-  message: { error: 'Too many login attempts. Please wait 15 minutes before trying again.' },
+  message: { error: 'Too many login attempts. Please wait 30 seconds before trying again.' },
 })
 
 // Student exam endpoints: 20 per minute

@@ -96,17 +96,15 @@ router.post('/exam/:code/submit', async (req, res) => {
         const studentAnswer = answers[q.id]
         if (studentAnswer !== undefined && studentAnswer !== null) {
           answeredCount++
-          try {
-            const opts = JSON.parse(q.options || '[]')
-            const correctIdx = opts.indexOf(q.correct_answer)
-            if (String(studentAnswer) === String(correctIdx)) {
-              score += (q.marks || 1)
-              correctCount++
-            } else {
-              wrongCount++
-              if (q.negative_marks) score -= q.negative_marks
-            }
-          } catch { wrongCount++ }
+          // correct_answer is stored as the option index (e.g. "0" = A, "1" = B, etc.)
+          // studentAnswer is also the option index from the frontend
+          if (String(studentAnswer) === String(q.correct_answer)) {
+            score += (q.marks || 1)
+            correctCount++
+          } else {
+            wrongCount++
+            if (q.negative_marks) score -= q.negative_marks
+          }
         }
       }
     }

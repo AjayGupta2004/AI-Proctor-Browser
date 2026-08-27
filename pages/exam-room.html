@@ -1242,54 +1242,6 @@
         ctx.lineTo(x + w, y + h - cl);
         ctx.stroke();
 
-        ctx.restore();
-      }
-
-      // Compact label above the first face
-      if (detections.length > 0) {
-        var firstBox  = detections[0].detection.box;
-        var labelText = count === 1 ? 'Face OK' : count + ' Faces';
-        var labelBg   = count === 1 ? 'rgba(10,31,21,0.88)' : 'rgba(26,11,11,0.88)';
-
-        ctx.save();
-        ctx.font = '500 10px system-ui, -apple-system, sans-serif';
-        var textWidth = ctx.measureText(labelText).width;
-        var labelX = firstBox.x;
-        var labelY = firstBox.y - 6;
-        var padX   = 5;
-        var labelH = 14;
-        var lx = labelX - padX;
-        var ly = labelY - labelH;
-        var lw = textWidth + padX * 2;
-        var lh = labelH + 3;
-        var lr = 3;
-
-        // Background pill
-        ctx.fillStyle = labelBg;
-        ctx.beginPath();
-        ctx.moveTo(lx + lr, ly);
-        ctx.lineTo(lx + lw - lr, ly);
-        ctx.arcTo(lx + lw, ly, lx + lw, ly + lr, lr);
-        ctx.lineTo(lx + lw, ly + lh - lr);
-        ctx.arcTo(lx + lw, ly + lh, lx + lw - lr, ly + lh, lr);
-        ctx.lineTo(lx + lr, ly + lh);
-        ctx.arcTo(lx, ly + lh, lx, ly + lh - lr, lr);
-        ctx.lineTo(lx, ly + lr);
-        ctx.arcTo(lx, ly, lx + lr, ly, lr);
-        ctx.closePath();
-        ctx.fill();
-
-        // Hairline border
-        ctx.strokeStyle = color;
-        ctx.lineWidth   = 0.8;
-        ctx.shadowBlur  = 0;
-        ctx.stroke();
-
-        // Text
-        ctx.fillStyle    = color;
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(labelText, labelX, labelY);
-        ctx.restore();
       }
     }
 
