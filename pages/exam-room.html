@@ -9,8 +9,8 @@
     * { box-sizing: border-box; margin: 0; padding: 0 }
 
     body {
-      background: #0D0F14;
-      color: #E2E4EC;
+      background: var(--bg-body-alt);
+      color: var(--text-primary);
       font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
       font-size: 14px;
       height: 100vh;
@@ -23,8 +23,8 @@
 
     /* ── Topbar ────────────────────────────── */
     .topbar-exam {
-      background: #13161E;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
       padding: 0 20px;
       height: 52px;
       display: flex;
@@ -33,24 +33,24 @@
       flex-shrink: 0;
     }
 
-    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #1D9E75; flex-shrink: 0 }
-    .exam-title-bar { font-size: 13px; font-weight: 500; color: #E2E4EC; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-    .exam-meta-bar { font-size: 11px; color: #5A5D6B; white-space: nowrap }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0 }
+    .exam-title-bar { font-size: 13px; font-weight: 500; color: var(--text-primary); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+    .exam-meta-bar { font-size: 11px; color: var(--text-muted); white-space: nowrap }
 
     .timer-wrap {
       display: flex; align-items: center; gap: 8px;
-      background: #1A1D28; border: 1px solid rgba(255,255,255,0.08);
+      background: var(--bg-raised); border: 1px solid var(--border-md);
       border-radius: 8px; padding: 6px 14px;
     }
     .timer-icon { width: 14px; height: 14px; flex-shrink: 0 }
-    .timer-val { font-size: 16px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: 0.04em; color: #E2E4EC }
-    .timer-val.warn { color: #EF9F27 }
-    .timer-val.danger { color: #E24B4A }
+    .timer-val { font-size: 16px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: 0.04em; color: var(--text-primary) }
+    .timer-val.warn { color: var(--amber) }
+    .timer-val.danger { color: var(--red) }
 
     .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0 }
-    .status-live { background: #E24B4A }
-    .status-ok { background: #1D9E75 }
-    .status-warn { background: #EF9F27 }
+    .status-live { background: var(--red) }
+    .status-ok { background: var(--green) }
+    .status-warn { background: var(--amber) }
 
     @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.4 } }
     .pulse { animation: pulse 1.5s ease-in-out infinite }
@@ -58,13 +58,13 @@
     /* ── Progress bar ─────────────────────── */
     .progress-strip {
       padding: 10px 20px 8px;
-      background: #0D0F14;
+      background: var(--bg-body-alt);
       flex-shrink: 0;
     }
     .progress-row { display: flex; flex-direction: column; gap: 6px }
-    .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: #5A5D6B }
-    .progress-track { height: 3px; background: #1E2235; border-radius: 2px; overflow: hidden }
-    .progress-fill { height: 100%; background: #378ADD; border-radius: 2px; transition: width .3s }
+    .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted) }
+    .progress-track { height: 3px; background: var(--bg-track); border-radius: 2px; overflow: hidden }
+    .progress-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width .3s }
 
     /* ── Body grid ─────────────────────────── */
     .exam-body {
@@ -80,100 +80,100 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
-      border-right: 1px solid rgba(255,255,255,0.06);
+      border-right: 1px solid var(--border);
       overflow-y: auto;
     }
 
     /* Warning banner */
     .warn-banner {
-      background: #2B1A10; border: 1px solid #854F0B; border-radius: 8px;
+      background: var(--amber-deep); border: 1px solid var(--amber-border-solid); border-radius: 8px;
       padding: 10px 14px; display: flex; align-items: center; gap: 10px;
-      font-size: 12px; color: #FAC775;
+      font-size: 12px; color: var(--amber-text);
     }
     .warn-banner.hidden { display: none }
     .warn-banner svg { flex-shrink: 0 }
     .warn-close {
-      margin-left: auto; cursor: pointer; color: #FAC775;
+      margin-left: auto; cursor: pointer; color: var(--amber-text);
       font-size: 16px; line-height: 1; padding: 0 2px;
       background: none; border: none; font-family: inherit;
     }
 
     /* Question card */
     .qcard {
-      background: #13161E; border: 1px solid rgba(255,255,255,0.08);
+      background: var(--bg-card); border: 1px solid var(--border-md);
       border-radius: 10px; padding: 20px; flex: 1;
     }
     .q-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap }
     .q-badge {
-      background: #1E2235; border: 1px solid rgba(255,255,255,0.1);
+      background: var(--bg-track); border: 1px solid var(--border-md);
       border-radius: 6px; padding: 4px 10px; font-size: 11px;
-      color: #7B7E8A; font-weight: 500;
+      color: var(--text-label); font-weight: 500;
     }
-    .q-marks { font-size: 11px; color: #5A5D6B; margin-left: auto }
-    .q-text { font-size: 15px; line-height: 1.65; color: #D8DAE5; margin-bottom: 20px; font-weight: 400 }
+    .q-marks { font-size: 11px; color: var(--text-muted); margin-left: auto }
+    .q-text { font-size: 15px; line-height: 1.65; color: var(--text-body); margin-bottom: 20px; font-weight: 400 }
 
     /* Options */
     .options { display: flex; flex-direction: column; gap: 8px }
     .opt {
-      background: #1A1D28; border: 1px solid rgba(255,255,255,0.07);
+      background: var(--bg-raised); border: 1px solid var(--border);
       border-radius: 8px; padding: 12px 14px; cursor: pointer;
       display: flex; align-items: center; gap: 12px;
       transition: border-color .15s, background .15s;
-      font-size: 13px; color: #C4C6D2;
+      font-size: 13px; color: var(--text-option);
     }
-    .opt:hover { background: #1E2235; border-color: rgba(55,138,221,0.4) }
-    .opt.selected { background: #0F1D2E; border-color: #378ADD; color: #B5D4F4 }
+    .opt:hover { background: var(--bg-track); border-color: var(--blue-border) }
+    .opt.selected { background: var(--blue-bg); border-color: var(--blue); color: var(--blue-light) }
     .opt-key {
       width: 26px; height: 26px; border-radius: 6px;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid var(--border-md);
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 500; color: #5A5D6B;
-      flex-shrink: 0; background: #111420;
+      font-size: 11px; font-weight: 500; color: var(--text-muted);
+      flex-shrink: 0; background: var(--bg-input);
     }
-    .opt.selected .opt-key { background: #185FA5; border-color: #378ADD; color: #B5D4F4 }
+    .opt.selected .opt-key { background: var(--blue-dark); border-color: var(--blue); color: var(--blue-light) }
 
     /* Question grid navigator */
     .qgrid { display: flex; flex-wrap: wrap; gap: 5px }
     .qnum {
       width: 26px; height: 26px; border-radius: 5px;
-      border: 1px solid rgba(255,255,255,0.08); background: #1A1D28;
+      border: 1px solid var(--border-md); background: var(--bg-raised);
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px; color: #5A5D6B; cursor: pointer; transition: all .15s;
+      font-size: 11px; color: var(--text-muted); cursor: pointer; transition: all .15s;
     }
-    .qnum.answered { background: #0F2A1A; border-color: #1D9E75; color: #5DCAA5 }
-    .qnum.current { background: #0F1D2E; border-color: #378ADD; color: #85B7EB }
-    .qnum.flagged { background: #2B1A10; border-color: #854F0B; color: #FAC775 }
+    .qnum.answered { background: var(--green-dark); border-color: var(--green); color: var(--green-text) }
+    .qnum.current { background: var(--blue-bg); border-color: var(--blue); color: var(--blue-soft) }
+    .qnum.flagged { background: var(--amber-deep); border-color: var(--amber-border-solid); color: var(--amber-text) }
 
     .section-label {
       font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
-      color: #3E4150; text-transform: uppercase; margin-bottom: 8px;
+      color: var(--text-hint); text-transform: uppercase; margin-bottom: 8px;
     }
 
     /* ── Bottom bar ────────────────────────── */
     .bottom-bar {
-      background: #13161E; border-top: 1px solid rgba(255,255,255,0.07);
+      background: var(--bg-card); border-top: 1px solid var(--border);
       padding: 0 20px; height: 44px; display: flex; align-items: center; gap: 12px;
       flex-shrink: 0;
     }
     .btn-er {
-      background: transparent; border: 1px solid rgba(255,255,255,0.12);
+      background: transparent; border: 1px solid var(--border-md);
       border-radius: 7px; padding: 6px 16px; font-size: 12px; font-weight: 500;
-      cursor: pointer; transition: all .15s; color: #9294A0; font-family: inherit;
+      cursor: pointer; transition: all .15s; color: var(--text-secondary); font-family: inherit;
     }
-    .btn-er:hover { background: #1E2235; color: #E2E4EC; border-color: rgba(255,255,255,0.2) }
+    .btn-er:hover { background: var(--bg-track); color: var(--text-primary); border-color: var(--border-strong) }
     .btn-er:disabled { opacity: 0.35; cursor: not-allowed }
-    .btn-er.primary { background: #185FA5; border-color: #378ADD; color: #B5D4F4 }
-    .btn-er.primary:hover { background: #1D6DB8 }
-    .btn-er.flag { color: #EF9F27; border-color: rgba(239,159,39,0.3) }
-    .btn-er.flag:hover { background: #2B1A10 }
-    .btn-er.flag.active-flag { background: #2B1A10; border-color: #EF9F27 }
-    .btn-er.submit { background: #0F2A1A; border-color: #1D9E75; color: #5DCAA5 }
-    .btn-er.submit:hover { background: #0F3520 }
+    .btn-er.primary { background: var(--blue-dark); border-color: var(--blue); color: var(--blue-light) }
+    .btn-er.primary:hover { background: var(--blue-hover) }
+    .btn-er.flag { color: var(--amber); border-color: var(--amber-border) }
+    .btn-er.flag:hover { background: var(--amber-deep) }
+    .btn-er.flag.active-flag { background: var(--amber-deep); border-color: var(--amber) }
+    .btn-er.submit { background: var(--green-dark); border-color: var(--green); color: var(--green-text) }
+    .btn-er.submit:hover { background: var(--green-hover) }
     .spacer { flex: 1 }
 
     /* ── Side panel ────────────────────────── */
     .side-panel {
-      background: #0F1117; padding: 16px;
+      background: var(--bg-panel); padding: 16px;
       display: flex; flex-direction: column; gap: 14px;
       overflow-y: auto;
     }
@@ -181,8 +181,8 @@
     /* Webcam */
     .cam-wrap {
       border-radius: 10px; overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.08);
-      aspect-ratio: 4/3; background: #0A0B10;
+      border: 1px solid var(--border-md);
+      aspect-ratio: 4/3; background: var(--cam-bg);
       position: relative; display: flex; align-items: center; justify-content: center;
     }
     .cam-wrap video {
@@ -199,71 +199,71 @@
     }
     .cam-top { padding: 8px 10px; display: flex; justify-content: space-between; align-items: center }
     .cam-badge {
-      background: rgba(229,68,68,0.15); border: 1px solid rgba(229,68,68,0.35);
-      border-radius: 5px; padding: 2px 8px; font-size: 10px; color: #FC8585;
+      background: rgba(192,57,43,0.10); border: 1px solid var(--red-border);
+      border-radius: 5px; padding: 2px 8px; font-size: 10px; color: var(--red-text);
       display: flex; align-items: center; gap: 5px; font-weight: 500;
     }
     .cam-bottom { margin-top: auto; padding: 8px 10px; display: flex; gap: 6px }
     .cam-stat {
-      background: rgba(0,0,0,0.55); border-radius: 5px; padding: 2px 8px;
-      font-size: 10px; color: #9294A0; display: flex; align-items: center; gap: 4px;
+      background: var(--shadow-overlay); border-radius: 5px; padding: 2px 8px;
+      font-size: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;
     }
     .cam-placeholder {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px; color: #3E4150; font-size: 11px; text-align: center; padding: 20px;
+      gap: 8px; color: var(--text-hint); font-size: 11px; text-align: center; padding: 20px;
     }
 
     /* AI signals */
     .signal-row { display: flex; flex-direction: column; gap: 5px }
     .signal {
-      background: #13161E; border: 1px solid rgba(255,255,255,0.06);
+      background: var(--bg-card); border: 1px solid var(--border);
       border-radius: 7px; padding: 8px 11px; display: flex; align-items: center; gap: 9px;
     }
     .sig-icon {
       width: 28px; height: 28px; border-radius: 6px;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .sig-ok { background: #0A1F15 }
-    .sig-warn { background: #1E1308 }
-    .sig-danger { background: #1A0B0B }
-    .sig-label { font-size: 12px; color: #9294A0; flex: 1 }
+    .sig-ok { background: var(--green-deep) }
+    .sig-warn { background: var(--amber-deep) }
+    .sig-danger { background: var(--red-bg) }
+    .sig-label { font-size: 12px; color: var(--text-secondary); flex: 1 }
     .sig-val { font-size: 11px; font-weight: 500 }
-    .val-ok { color: #5DCAA5 }
-    .val-warn { color: #FAC775 }
-    .val-danger { color: #FC8585 }
+    .val-ok { color: var(--green-text) }
+    .val-warn { color: var(--amber-text) }
+    .val-danger { color: var(--red-text) }
 
     /* Risk bar */
     .risk-bar-wrap {
-      background: #13161E; border: 1px solid rgba(255,255,255,0.06);
+      background: var(--bg-card); border: 1px solid var(--border);
       border-radius: 8px; padding: 10px 12px;
     }
     .risk-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px }
-    .risk-title { font-size: 11px; color: #5A5D6B }
-    .risk-val { font-size: 13px; font-weight: 500; color: #5DCAA5 }
-    .risk-track { height: 5px; background: #1E2235; border-radius: 3px; overflow: hidden }
-    .risk-fill { height: 100%; background: #1D9E75; border-radius: 3px; transition: width .6s, background .4s }
-    .risk-fill.medium { background: #EF9F27 }
-    .risk-fill.high { background: #E24B4A }
+    .risk-title { font-size: 11px; color: var(--text-muted) }
+    .risk-val { font-size: 13px; font-weight: 500; color: var(--green-text) }
+    .risk-track { height: 5px; background: var(--bg-track); border-radius: 3px; overflow: hidden }
+    .risk-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width .6s, background .4s }
+    .risk-fill.medium { background: var(--amber) }
+    .risk-fill.high { background: var(--red) }
 
     /* ── Submit confirmation modal ──────── */
     .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(8,9,14,0.88);
+      position: fixed; inset: 0; background: var(--overlay-bg);
       display: flex; align-items: center; justify-content: center; z-index: 1000;
     }
     .modal-backdrop.hidden { display: none }
     .modal-box {
-      background: #13161E; border: 1px solid rgba(255,255,255,0.12);
+      background: var(--bg-card); border: 1px solid var(--border-md);
       border-radius: 14px; width: 420px; overflow: hidden;
     }
     .modal-head {
-      padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; gap: 10px;
     }
-    .modal-title { font-size: 15px; font-weight: 600; color: #E2E4EC }
-    .modal-body { padding: 18px 20px; font-size: 13px; color: #9294A0; line-height: 1.7 }
-    .modal-body strong { color: #E2E4EC }
+    .modal-title { font-size: 15px; font-weight: 600; color: var(--text-primary) }
+    .modal-body { padding: 18px 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.7 }
+    .modal-body strong { color: var(--text-primary) }
     .modal-foot {
-      padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 14px 20px; border-top: 1px solid var(--border);
       display: flex; gap: 10px; justify-content: flex-end;
     }
 
@@ -271,83 +271,83 @@
     .violation-overlay {
       position: fixed; inset: 0;
       display: flex; align-items: center; justify-content: center;
-      background: rgba(8,9,14,0.92); z-index: 2000;
+      background: var(--overlay-heavy); z-index: 2000;
     }
     .violation-overlay.hidden { display: none }
     .vio-modal {
-      background: #13161E; border: 1px solid rgba(226,75,74,0.35);
+      background: var(--bg-card); border: 1px solid var(--red-border);
       border-radius: 14px; width: 420px; overflow: hidden;
     }
     .vio-header {
-      background: #180A0A; border-bottom: 1px solid rgba(226,75,74,0.2);
+      background: var(--red-surface); border-bottom: 1px solid var(--red-border);
       padding: 18px 20px; display: flex; align-items: center; gap: 12px;
     }
     .alert-icon-wrap {
       width: 42px; height: 42px; border-radius: 10px;
-      background: #2A0E0E; border: 1px solid rgba(226,75,74,0.3);
+      background: var(--red-deep); border: 1px solid var(--red-border);
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
     @keyframes shake { 0%,100% { transform: translateX(0) } 20%,60% { transform: translateX(-4px) } 40%,80% { transform: translateX(4px) } }
     @keyframes pulse-red { 0%,100% { box-shadow: 0 0 0 0 rgba(226,75,74,0) } 50% { box-shadow: 0 0 0 6px rgba(226,75,74,0.18) } }
     .vio-modal.entered .alert-icon-wrap { animation: shake .5s ease-in-out, pulse-red 2s 0.5s ease-in-out infinite }
-    .vio-title { font-size: 15px; font-weight: 500; color: #FC8585 }
-    .vio-sub { font-size: 11px; color: #6A2020; margin-top: 2px }
+    .vio-title { font-size: 15px; font-weight: 500; color: var(--red-text) }
+    .vio-sub { font-size: 11px; color: var(--red-border-dark); margin-top: 2px }
     .vio-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px }
     .incident-box {
-      background: #0F0808; border: 1px solid rgba(226,75,74,0.15);
+      background: var(--red-deepest); border: 1px solid var(--red-border);
       border-radius: 9px; padding: 13px 14px;
     }
     .inc-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 3px 0 }
-    .inc-lbl { color: #5A3030 }
-    .inc-val { color: #C8A0A0; font-weight: 500 }
-    .inc-val-red { color: #FC8585 }
+    .inc-lbl { color: var(--red-muted) }
+    .inc-val { color: var(--red-soft); font-weight: 500 }
+    .inc-val-red { color: var(--red-text) }
     .vio-warning-text {
-      font-size: 13px; color: #9294A0; line-height: 1.65;
-      border-left: 2px solid rgba(226,75,74,0.4); padding-left: 12px;
+      font-size: 13px; color: var(--text-secondary); line-height: 1.65;
+      border-left: 2px solid var(--red-border); padding-left: 12px;
     }
     .consequence-list { display: flex; flex-direction: column; gap: 6px }
-    .cq { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #7A5050 }
-    .cq-dot { width: 5px; height: 5px; border-radius: 50%; background: #7A2020; margin-top: 4px; flex-shrink: 0 }
+    .cq { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--red-dim) }
+    .cq-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red-dark); margin-top: 4px; flex-shrink: 0 }
     .ack-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer }
     .ack-check {
-      width: 15px; height: 15px; border: 1px solid rgba(226,75,74,0.4);
-      border-radius: 3px; background: #0F0808; cursor: pointer;
+      width: 15px; height: 15px; border: 1px solid var(--red-border);
+      border-radius: 3px; background: var(--red-deepest); cursor: pointer;
       flex-shrink: 0; display: flex; align-items: center; justify-content: center;
     }
-    .ack-check.checked { background: #7A2020; border-color: #E24B4A }
-    .ack-check.checked::after { content: '✓'; font-size: 10px; color: #FC8585 }
-    .ack-lbl { font-size: 12px; color: #7A5050; cursor: pointer }
+    .ack-check.checked { background: var(--red-dark); border-color: var(--red) }
+    .ack-check.checked::after { content: '✓'; font-size: 10px; color: var(--red-text) }
+    .ack-lbl { font-size: 12px; color: var(--red-dim); cursor: pointer }
     .vio-footer {
-      padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 14px 20px; border-top: 1px solid var(--border);
       display: flex; gap: 8px;
     }
     .btn-vio-continue {
-      flex: 1; background: #1A0B0B; border: 1px solid rgba(226,75,74,0.4);
+      flex: 1; background: var(--red-bg); border: 1px solid var(--red-border);
       border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 500;
-      color: #FC8585; cursor: pointer; transition: all .2s; opacity: 0.45;
+      color: var(--red-text); cursor: pointer; transition: all .2s; opacity: 0.45;
       font-family: inherit;
     }
     .btn-vio-continue.enabled { opacity: 1 }
-    .btn-vio-continue.enabled:hover { background: #2A1010 }
+    .btn-vio-continue.enabled:hover { background: var(--red-deep) }
     .violation-counter {
-      background: #2A0E0E; border: 1px solid rgba(226,75,74,0.3);
+      background: var(--red-deep); border: 1px solid var(--red-border);
       border-radius: 7px; padding: 7px 12px;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .vc-label { font-size: 11px; color: #5A3030 }
-    .vc-val { font-size: 15px; font-weight: 500; color: #FC8585 }
-    .vc-max { font-size: 11px; color: #5A3030 }
-    .color-bar { height: 3px; background: #1A0B0B; border-radius: 2px; margin-top: 6px; overflow: hidden }
-    .color-bar-fill { height: 100%; background: #E24B4A; border-radius: 2px; transition: width .5s }
+    .vc-label { font-size: 11px; color: var(--red-muted) }
+    .vc-val { font-size: 15px; font-weight: 500; color: var(--red-text) }
+    .vc-max { font-size: 11px; color: var(--red-muted) }
+    .color-bar { height: 3px; background: var(--red-bg); border-radius: 2px; margin-top: 6px; overflow: hidden }
+    .color-bar-fill { height: 100%; background: var(--red); border-radius: 2px; transition: width .5s }
 
     /* ── Error screen ──────────────────── */
     .error-screen {
       display: flex; align-items: center; justify-content: center;
       height: 100vh; flex-direction: column; gap: 12px;
-      color: #FC8585; padding: 40px; text-align: center;
+      color: var(--red-text); padding: 40px; text-align: center;
     }
     .error-screen .err-title { font-size: 18px; font-weight: 600 }
-    .error-screen .err-msg { font-size: 13px; color: #9294A0; max-width: 500px }
+    .error-screen .err-msg { font-size: 13px; color: var(--text-secondary); max-width: 500px }
   </style>
 </head>
 
@@ -427,7 +427,7 @@
                 <div class="status-dot status-live pulse" style="width:5px;height:5px"></div>
                 Live
               </div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.25)">CAM 1</div>
+              <div style="font-size:10px;color:var(--text-hint)">CAM 1</div>
             </div>
             <div style="flex:1"></div>
             <div class="cam-bottom">

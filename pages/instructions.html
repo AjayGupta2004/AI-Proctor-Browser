@@ -21,7 +21,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
       padding: 30px 40px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 10px 40px var(--shadow-overlay);
     }
 
     .inst-header { text-align: center; margin-bottom: 22px; }
@@ -46,7 +46,7 @@
       align-items: center;
       gap: 5px;
     }
-    .meta-pill.warn { border-color: rgba(226,75,74,0.3); color: #FC8585; background: #1A0B0B; }
+    .meta-pill.warn { border-color: var(--red-border); color: var(--red-text); background: var(--red-bg); }
 
     .inst-group { margin-bottom: 22px; }
     .inst-group h2 {
@@ -54,8 +54,8 @@
       letter-spacing: 0.05em; margin-bottom: 12px;
       padding-bottom: 6px; border-bottom: 1px solid var(--border);
     }
-    .inst-group.dos h2  { color: #5DCAA5; border-bottom-color: rgba(29,158,117,0.3); }
-    .inst-group.donts h2 { color: #FC8585; border-bottom-color: rgba(226,75,74,0.3); }
+    .inst-group.dos h2  { color: var(--green-text); border-bottom-color: var(--green-border); }
+    .inst-group.donts h2 { color: var(--red-text); border-bottom-color: var(--red-border); }
 
     .inst-list { list-style: none; }
     .inst-list li {

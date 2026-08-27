@@ -13,7 +13,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: #0A0C11;
+      background: var(--bg-base);
       padding: 24px;
     }
 
@@ -23,8 +23,8 @@
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(55, 138, 221, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(55, 138, 221, 0.03) 1px, transparent 1px);
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
       background-size: 40px 40px;
       pointer-events: none;
       z-index: 0;
@@ -52,8 +52,8 @@
       width: 52px;
       height: 52px;
       border-radius: 14px;
-      background: #0F1D2E;
-      border: 1px solid rgba(55, 138, 221, 0.3);
+      background: var(--blue-bg);
+      border: 1px solid var(--blue-border);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -62,19 +62,19 @@
     .brand-name {
       font-size: 22px;
       font-weight: 500;
-      color: #E2E4EC;
+      color: var(--text-primary);
       letter-spacing: -0.01em;
     }
 
     .brand-tagline {
       font-size: 12px;
-      color: #4A4D5A;
+      color: var(--text-dim);
     }
 
     /* ── Card ────────────────────────────────── */
     .auth-card {
-      background: #13161E;
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: 14px;
       overflow: hidden;
     }
@@ -84,7 +84,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      border-bottom: 1px solid var(--border);
     }
 
     .role-btn {
@@ -96,7 +96,7 @@
       cursor: pointer;
       font-size: 13px;
       font-weight: 500;
-      color: #5A5D6B;
+      color: var(--text-muted);
       border: none;
       background: transparent;
       border-bottom: 2px solid transparent;
@@ -105,20 +105,20 @@
     }
 
     .role-btn:hover {
-      color: #9294A0;
-      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-secondary);
+      background: var(--border-faint);
     }
 
     .role-btn.active-student {
-      color: #5DCAA5;
-      border-bottom-color: #1D9E75;
+      color: var(--green-text);
+      border-bottom-color: var(--green);
       background: rgba(29, 158, 117, 0.04);
     }
 
     .role-btn.active-teacher {
-      color: #7BB8E8;
-      border-bottom-color: #378ADD;
-      background: rgba(55, 138, 221, 0.04);
+      color: var(--blue-text);
+      border-bottom-color: var(--blue);
+      background: var(--blue-bg);
     }
 
     .role-icon {
@@ -133,15 +133,15 @@
     }
 
     .role-btn.active-student .role-icon {
-      background: #091510;
+      background: var(--green-bg);
     }
 
     .role-btn.active-teacher .role-icon {
-      background: #081526;
+      background: var(--blue-bg);
     }
 
     .role-btn:not(.active-student):not(.active-teacher) .role-icon {
-      background: #1A1D28;
+      background: var(--bg-raised);
     }
 
     /* ── Role badge ──────────────────────────── */
@@ -158,15 +158,15 @@
     }
 
     .rb-student {
-      background: #091510;
-      border-color: #1A5230;
-      color: #5DCAA5;
+      background: var(--green-bg);
+      border-color: var(--green-border-solid);
+      color: var(--green-text);
     }
 
     .rb-teacher {
-      background: #081526;
-      border-color: #1A3D6B;
-      color: #7BB8E8;
+      background: var(--blue-bg);
+      border-color: var(--blue-border);
+      color: var(--blue-text);
     }
 
     /* ── Form body ───────────────────────────── */
@@ -187,12 +187,12 @@
     .form-title {
       font-size: 16px;
       font-weight: 500;
-      color: #E2E4EC;
+      color: var(--text-primary);
     }
 
     .form-sub {
       font-size: 12px;
-      color: #5A5D6B;
+      color: var(--text-muted);
     }
 
     /* ── Input fields ────────────────────────── */
@@ -204,17 +204,17 @@
 
     .field label {
       font-size: 12px;
-      color: #7A7D8A;
+      color: var(--text-label);
       font-weight: 500;
     }
 
     .field input {
-      background: #0D0F16;
-      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 10px 13px;
       font-size: 13px;
-      color: #E2E4EC;
+      color: var(--text-primary);
       outline: none;
       transition: border-color 0.15s;
       font-family: inherit;
@@ -222,15 +222,15 @@
     }
 
     .field input::placeholder {
-      color: #3E4150;
+      color: var(--text-hint);
     }
 
     .field input:focus {
-      border-color: rgba(55, 138, 221, 0.5);
+      border-color: var(--blue-border);
     }
 
     .field input:focus.student-focus {
-      border-color: rgba(29, 158, 117, 0.5);
+      border-color: var(--green-border);
     }
 
     /* ── Password row ────────────────────────── */
@@ -248,7 +248,7 @@
       top: 50%;
       transform: translateY(-50%);
       cursor: pointer;
-      color: #4A4D5A;
+      color: var(--text-dim);
       background: none;
       border: none;
       padding: 0;
@@ -259,7 +259,7 @@
     }
 
     .pw-toggle:hover {
-      color: #9294A0;
+      color: var(--text-secondary);
     }
 
     /* ── Remember + Forgot ───────────────────── */
@@ -275,27 +275,27 @@
       gap: 7px;
       cursor: pointer;
       font-size: 12px;
-      color: #5A5D6B;
+      color: var(--text-muted);
       user-select: none;
     }
 
     .remember input[type="checkbox"] {
       width: 14px;
       height: 14px;
-      accent-color: #1D9E75;
+      accent-color: var(--green);
       cursor: pointer;
     }
 
     .forgot-link {
       font-size: 12px;
-      color: #4A4D5A;
+      color: var(--text-dim);
       cursor: pointer;
       text-decoration: none;
       transition: color 0.15s;
     }
 
     .forgot-link:hover {
-      color: #9294A0;
+      color: var(--text-secondary);
     }
 
     /* ── Submit button ───────────────────────── */
@@ -313,23 +313,23 @@
     }
 
     .submit-student {
-      background: #0F2A1A;
-      border-color: #1D9E75;
-      color: #5DCAA5;
+      background: var(--green-dark);
+      border-color: var(--green);
+      color: var(--green-text);
     }
 
     .submit-student:hover {
-      background: #143520;
+      background: var(--green-hover);
     }
 
     .submit-teacher {
-      background: #0F1D2E;
-      border-color: #378ADD;
-      color: #7BB8E8;
+      background: var(--blue-bg);
+      border-color: var(--blue);
+      color: var(--blue-text);
     }
 
     .submit-teacher:hover {
-      background: #142540;
+      background: var(--blue-hover);
     }
 
     /* ── Divider ─────────────────────────────── */
@@ -338,7 +338,7 @@
       align-items: center;
       gap: 10px;
       font-size: 11px;
-      color: #3A3D4A;
+      color: var(--text-divider);
     }
 
     .divider::before,
@@ -346,14 +346,14 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--border-faint);
     }
 
     /* ── Signup link row ─────────────────────── */
     .switch-row {
       text-align: center;
       font-size: 12px;
-      color: #5A5D6B;
+      color: var(--text-muted);
       padding: 0 24px 20px;
     }
 
@@ -365,25 +365,25 @@
     }
 
     .switch-link-green {
-      color: #1D9E75;
+      color: var(--green);
     }
 
     .switch-link-green:hover {
-      color: #5DCAA5;
+      color: var(--green-text);
     }
 
     .switch-link-blue {
-      color: #378ADD;
+      color: var(--blue);
     }
 
     .switch-link-blue:hover {
-      color: #7BB8E8;
+      color: var(--blue-text);
     }
 
     /* ── Student ID chip (only for student) ───── */
     .student-id-note {
       font-size: 11px;
-      color: #4A4D5A;
+      color: var(--text-dim);
       display: flex;
       align-items: center;
       gap: 5px;
@@ -391,12 +391,12 @@
 
     /* ── Error message ───────────────────────── */
     .error-msg {
-      background: #1A0B0B;
-      border: 1px solid rgba(226, 75, 74, 0.3);
+      background: var(--red-bg);
+      border: 1px solid var(--red-border);
       border-radius: 7px;
       padding: 8px 12px;
       font-size: 12px;
-      color: #FC8585;
+      color: var(--red-text);
       display: none;
       align-items: center;
       gap: 8px;
@@ -410,7 +410,7 @@
     .auth-footer {
       text-align: center;
       font-size: 11px;
-      color: #2E3040;
+      color: var(--bg-divider);
     }
   </style>
 </head>

@@ -21,7 +21,7 @@
     .sidebar {
       width: 220px;
       flex-shrink: 0;
-      background: #0D0F16;
+      background: var(--bg-surface);
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
@@ -41,8 +41,8 @@
       width: 34px;
       height: 34px;
       border-radius: 9px;
-      background: #0F1D2E;
-      border: 1px solid rgba(55, 138, 221, 0.3);
+      background: var(--blue-bg);
+      border: 1px solid var(--blue-border);
       display: flex;
       align-items: center;
       justify-content: center
@@ -93,8 +93,8 @@
 
     .nav-item.active {
       background: var(--blue-bg);
-      color: #7BB8E8;
-      border: 1px solid rgba(55, 138, 221, .2)
+      color: var(--blue-text);
+      border: 1px solid var(--blue-border)
     }
 
     .nav-icon {
@@ -119,13 +119,13 @@
       width: 30px;
       height: 30px;
       border-radius: 8px;
-      background: linear-gradient(135deg, #185FA5, #0F3520);
+      background: linear-gradient(135deg, var(--blue-dark), var(--green-hover));
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 12px;
       font-weight: 700;
-      color: #E2E4EC;
+      color: var(--text-primary);
       flex-shrink: 0
     }
 
@@ -157,7 +157,7 @@
     .logout-btn:hover {
       background: var(--red-bg);
       border-color: var(--red-border);
-      color: #FC8585
+      color: var(--red-text)
     }
 
     .main {
@@ -303,7 +303,7 @@
     }
 
     .results-table tr:hover td {
-      background: rgba(255, 255, 255, .02)
+      background: var(--border-faint)
     }
 
     .pass-badge {
@@ -316,15 +316,15 @@
     }
 
     .pass {
-      background: #0D1F10;
-      border-color: rgba(29, 158, 117, .4);
-      color: #5DCAA5
+      background: var(--green-deep);
+      border-color: var(--green-border);
+      color: var(--green-text)
     }
 
     .fail {
-      background: #1A0B0B;
-      border-color: rgba(226, 75, 74, .35);
-      color: #FC8585
+      background: var(--red-bg);
+      border-color: var(--red-border);
+      color: var(--red-text)
     }
 
     .rank-badge {
@@ -339,21 +339,21 @@
     }
 
     .rank-1 {
-      background: #1A1208;
-      color: #EF9F27;
-      border: 1px solid rgba(239, 159, 39, .4)
+      background: var(--amber-bg);
+      color: var(--amber);
+      border: 1px solid var(--amber-border)
     }
 
     .rank-2 {
-      background: #0D101A;
-      color: #9294A0;
-      border: 1px solid rgba(255, 255, 255, .12)
+      background: var(--bg-body-alt);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-md)
     }
 
     .rank-3 {
-      background: #1A0E08;
-      color: #C48B60;
-      border: 1px solid rgba(196, 139, 96, .3)
+      background: var(--amber-dark);
+      color: var(--amber-soft);
+      border: 1px solid var(--amber-border)
     }
 
     .rank-n {
@@ -446,12 +446,12 @@
 
     #toast.toast-err {
       border-color: var(--red-border);
-      color: #FC8585
+      color: var(--red-text)
     }
 
     #toast.toast-ok {
       border-color: var(--green-border);
-      color: #5DCAA5
+      color: var(--green-text)
     }
   </style>
 </head>

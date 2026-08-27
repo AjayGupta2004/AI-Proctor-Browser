@@ -126,7 +126,7 @@
 
     .cam-thumb {
       aspect-ratio: 4/3;
-      background: #0A0C14;
+      background: var(--bg-base);
       position: relative;
       display: flex;
       align-items: center;
@@ -138,7 +138,7 @@
       height: 36px;
       background: rgba(29, 158, 117, 0.1);
       border-radius: 50% 50% 40% 40%;
-      border: 1px solid rgba(29, 158, 117, 0.25);
+      border: 1px solid var(--green-border);
       margin-top: 12px;
     }
 
@@ -165,21 +165,21 @@
     }
 
     .rc-low {
-      background: #091510;
-      color: #5DCAA5;
-      border-color: #1A5230;
+      background: var(--green-bg);
+      color: var(--green-text);
+      border-color: var(--green-border-solid);
     }
 
     .rc-medium {
-      background: #1C1208;
-      color: #FAC775;
-      border-color: #6B3D08;
+      background: var(--amber-dark);
+      color: var(--amber-text);
+      border-color: var(--amber-border-dark);
     }
 
     .rc-high {
-      background: #1A0B0B;
-      color: #FC8585;
-      border-color: #7A2020;
+      background: var(--red-bg);
+      color: var(--red-text);
+      border-color: var(--red-dark);
     }
 
     .no-face-overlay {
@@ -201,7 +201,7 @@
     .cand-name {
       font-size: 11px;
       font-weight: 500;
-      color: #B0B2BE;
+      color: var(--text-soft);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -238,7 +238,7 @@
 
     .detail-cam {
       aspect-ratio: 4/3;
-      background: #0A0B12;
+      background: var(--cam-bg);
       position: relative;
       display: flex;
       align-items: center;
@@ -256,7 +256,7 @@
     .face-corners {
       position: absolute;
       inset: 8px;
-      border: 1.5px solid rgba(29, 158, 117, 0.35);
+      border: 1.5px solid var(--green-border);
       border-radius: 4px;
     }
 
@@ -393,7 +393,7 @@
 
     .act-btn-red {
       border-color: rgba(226, 75, 74, 0.3);
-      color: #FC8585;
+      color: var(--red-text);
     }
 
     .act-btn-red:hover {
@@ -402,7 +402,7 @@
 
     .act-btn-blue {
       border-color: rgba(55, 138, 221, 0.3);
-      color: #7BB8E8;
+      color: var(--blue-text);
     }
 
     .act-btn-blue:hover {
@@ -411,7 +411,7 @@
 
     /* ── Footer ─────────────────────────────── */
     .pd-footer {
-      background: #0F1117;
+      background: var(--bg-panel);
       border-top: 1px solid var(--border);
       padding: 0 18px;
       height: 36px;

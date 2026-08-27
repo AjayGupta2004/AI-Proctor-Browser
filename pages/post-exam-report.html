@@ -88,8 +88,8 @@
       align-items: center;
       gap: 12px;
       padding: 12px 14px;
-      background: #0D1808;
-      border: 1px solid rgba(29, 158, 117, 0.2);
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
       border-radius: var(--radius-md);
       margin-top: 14px;
     }
@@ -98,8 +98,8 @@
       width: 36px;
       height: 36px;
       border-radius: 8px;
-      background: #0A1F15;
-      border: 1px solid rgba(29, 158, 117, 0.25);
+      background: var(--green-deep);
+      border: 1px solid var(--green-border);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -165,8 +165,8 @@
     }
 
     .tl-red .tl-dot {
-      background: #E24B4A;
-      border-color: #E24B4A;
+      background: var(--red);
+      border-color: var(--red);
     }
 
     .tl-red .tl-connector {
@@ -174,38 +174,38 @@
     }
 
     .tl-red .tl-title {
-      color: #FC8585;
+      color: var(--red-text);
     }
 
     .tl-amber .tl-dot {
-      background: #EF9F27;
-      border-color: #EF9F27;
+      background: var(--amber);
+      border-color: var(--amber);
     }
 
     .tl-amber .tl-connector {
-      background: rgba(239, 159, 39, 0.2);
+      background: var(--amber-border);
     }
 
     .tl-amber .tl-title {
-      color: #FAC775;
+      color: var(--amber-text);
     }
 
     .tl-green .tl-dot {
-      background: #1D9E75;
-      border-color: #1D9E75;
+      background: var(--green);
+      border-color: var(--green);
     }
 
     .tl-green .tl-connector {
-      background: rgba(29, 158, 117, 0.15);
+      background: var(--green-border);
     }
 
     .tl-green .tl-title {
-      color: #5DCAA5;
+      color: var(--green-text);
     }
 
     .tl-gray .tl-dot {
-      background: #3A3D4A;
-      border-color: #3A3D4A;
+      background: var(--text-divider);
+      border-color: var(--text-divider);
     }
 
     .tl-gray .tl-connector {
@@ -251,12 +251,12 @@
 
     .ai-summary {
       font-size: 12px;
-      color: #8A8D9A;
+      color: var(--text-label);
       line-height: 1.75;
       background: var(--bg-surface);
       border-radius: var(--radius-md);
       padding: 12px 14px;
-      border-left: 2px solid rgba(55, 138, 221, 0.4);
+      border-left: 2px solid var(--blue-border);
     }
 
     .ai-tag {
@@ -304,7 +304,7 @@
       body {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        background: #0A0C11;
+        background: var(--bg-base);
       }
     }
   </style>

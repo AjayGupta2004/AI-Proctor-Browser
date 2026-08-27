@@ -23,7 +23,7 @@
     .sidebar {
       width: 220px;
       flex-shrink: 0;
-      background: #0D0F16;
+      background: var(--bg-surface);
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
@@ -43,8 +43,8 @@
       width: 34px;
       height: 34px;
       border-radius: 9px;
-      background: #0F1D2E;
-      border: 1px solid rgba(55, 138, 221, 0.3);
+      background: var(--blue-bg);
+      border: 1px solid var(--blue-border);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -97,8 +97,8 @@
 
     .nav-item.active {
       background: var(--blue-bg);
-      color: #7BB8E8;
-      border: 1px solid rgba(55, 138, 221, .2);
+      color: var(--blue-text);
+      border: 1px solid var(--blue-border);
     }
 
     .nav-icon {
@@ -123,13 +123,13 @@
       width: 30px;
       height: 30px;
       border-radius: 8px;
-      background: linear-gradient(135deg, #185FA5, #0F3520);
+      background: linear-gradient(135deg, var(--blue-dark), var(--green-hover));
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 12px;
       font-weight: 700;
-      color: #E2E4EC;
+      color: var(--text-primary);
       flex-shrink: 0;
     }
 
@@ -164,7 +164,7 @@
     .logout-btn:hover {
       background: var(--red-bg);
       border-color: var(--red-border);
-      color: #FC8585;
+      color: var(--red-text);
     }
 
     /* Main */
@@ -234,8 +234,8 @@
 
     .filter-btn.active {
       background: var(--blue-bg);
-      border-color: rgba(55, 138, 221, .4);
-      color: #7BB8E8;
+      border-color: var(--blue-border);
+      color: var(--blue-text);
     }
 
     /* Exam cards */
@@ -264,7 +264,7 @@
     }
 
     .exam-card.status-draft {
-      border-left: 3px solid rgba(255, 255, 255, .1);
+      border-left: 3px solid var(--border);
     }
 
     .ec-top {
@@ -323,34 +323,34 @@
     }
 
     .sb-draft {
-      background: #111420;
-      border-color: rgba(255, 255, 255, .12);
+      background: var(--bg-input);
+      border-color: var(--border-md);
       color: var(--text-muted);
     }
 
     .sb-published {
       background: var(--blue-bg);
-      border-color: rgba(55, 138, 221, .3);
-      color: #7BB8E8;
+      border-color: var(--blue-border);
+      color: var(--blue-text);
     }
 
     .sb-active {
       background: var(--green-bg);
-      border-color: rgba(29, 158, 117, .35);
-      color: #5DCAA5;
+      border-color: var(--green-border);
+      color: var(--green-text);
     }
 
     .sb-ended {
       background: var(--amber-bg);
-      border-color: rgba(239, 159, 39, .3);
-      color: #FAC775;
+      border-color: var(--amber-border);
+      color: var(--amber-text);
     }
 
     /* Delete confirm modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(8, 9, 14, .85);
+      background: var(--overlay-bg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -465,12 +465,12 @@
 
     #toast.toast-err {
       border-color: var(--red-border);
-      color: #FC8585;
+      color: var(--red-text);
     }
 
     #toast.toast-ok {
       border-color: var(--green-border);
-      color: #5DCAA5;
+      color: var(--green-text);
     }
   </style>
 </head>
