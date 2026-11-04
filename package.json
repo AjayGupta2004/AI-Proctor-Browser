@@ -1,20 +1,29 @@
 {
   "name": "ai-proctor-browser",
   "version": "1.0.0",
-  "description": "AI-powered secure exam browser with real-time proctoring",
+  "description": "Electron desktop exam platform with exam management and real-time proctoring signals",
   "main": "main.js",
   "scripts": {
     "start": "electron main.js",
     "start:backend": "cd backend && node index.js",
     "install:backend": "cd backend && npm install",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test backend/test/*.test.js"
   },
-  "keywords": [],
+  "keywords": [
+    "electron",
+    "exam",
+    "proctoring",
+    "edtech",
+    "nodejs",
+    "express",
+    "socket.io",
+    "postgresql"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "electron": "^41.1.1"
+    "electron": "^45.2.2"
   },
   "dependencies": {
     "socket.io-client": "^4.8.3"
